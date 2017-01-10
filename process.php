@@ -35,19 +35,15 @@ require_login();
 
 $url = new moodle_url('/local/banner/process.php', array('id' => $id));
 $PAGE->set_url($url);
-
 $PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
 $PAGE->requires->js_call_amd('local_banner/crop', 'cropper');
 $PAGE->requires->css('/local/banner/css/cropper.css');
 
-$params = new stdClass();
-
-echo $OUTPUT->header();
-
 $record = $DB->get_record('local_banner', array('course' => $id), '*', MUST_EXIST);
 
 $fs = get_file_storage();
+
 $file = $fs->get_file_by_id($record->file);
 
 $fileurl = moodle_url::make_pluginfile_url(
@@ -59,7 +55,28 @@ $fileurl = moodle_url::make_pluginfile_url(
     $file->get_filename()
 );
 
+$mform = new \local_banner\form\process();
+
+if ($mform->is_cancelled()) {
+
+} else if ($data = $mform->get_data()) {
+
+} else {
+    $data = new stdClass();
+    $data->cropx = $record->cropx;
+    $data->cropy = $record->cropy;
+
+    $mform->set_data($data);
+}
+
+
+echo $OUTPUT->header();
+
 echo "<div><img src=\"$fileurl\" id='bannerimage' /></div>";
+echo "<br/>x<input type='text' id='tx'>";
+echo "<br/>y<input type='text' id='ty'>";
+
+echo $mform->display();
 
 echo $OUTPUT->footer();
 

@@ -40,7 +40,6 @@ if (!has_capability('moodle/course:update', $coursecontext)) {
 $posturl = new moodle_url('/local/banner/process.php', array('id' => $id));
 $url = new moodle_url('/local/banner/upload.php', array('id' => $id));
 $PAGE->set_url($url);
-
 $PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
 

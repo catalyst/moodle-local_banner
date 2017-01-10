@@ -27,3 +27,4 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Course Banner';
 $string['uploadfile'] = 'Banner Upload';
+$string['setfocus'] = 'Set Focus';

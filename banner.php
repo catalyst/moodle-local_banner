@@ -29,7 +29,6 @@ global $PAGE;
 
 $url = new moodle_url('/local/banner/banner.php');
 $PAGE->set_url($url);
-
 $PAGE->set_context(context_system::instance()); // TODO: Course context.
 $PAGE->set_pagelayout('standard');
 
