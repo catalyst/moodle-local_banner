@@ -49,7 +49,7 @@ class upload extends \moodleform {
         $mform->setType('id', PARAM_INT);
 
         $mform->addElement('filemanager', 'banners', get_string('uploadfile', 'local_banner'), null, array(
-            'subdirs' => 0, 'maxfiles' => 1
+            'subdirs' => 0, 'maxfiles' => 1, 'accepted_types' => array('image')
         ));
 
         $this->add_action_buttons(true, get_string('uploadfile', 'local_banner'));

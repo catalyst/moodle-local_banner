@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Banner generation.
+ * Banner crop processing.
  *
  * @package    local_banner
  * @author     Nicholas Hoobin <nicholashoobin@catalyst-au.net>
@@ -25,13 +25,42 @@
 
 require_once(__DIR__ . '/../../config.php');
 
-global $PAGE;
+global $PAGE, $DB;
 
-$url = new moodle_url('/local/banner/banner.php');
+$id = required_param('id', PARAM_INT);
+$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+$coursecontext = context_course::instance($course->id);
+
+require_login();
+
+$url = new moodle_url('/local/banner/process.php', array('id' => $id));
 $PAGE->set_url($url);
 
-$PAGE->set_context(context_system::instance()); // TODO: Course context.
+$PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
+$PAGE->requires->js_call_amd('local_banner/crop', 'cropper');
+$PAGE->requires->css('/local/banner/css/cropper.css');
+
+$params = new stdClass();
 
 echo $OUTPUT->header();
+
+$record = $DB->get_record('local_banner', array('course' => $id), '*', MUST_EXIST);
+
+$fs = get_file_storage();
+$file = $fs->get_file_by_id($record->file);
+
+$fileurl = moodle_url::make_pluginfile_url(
+    $file->get_contextid(),
+    $file->get_component(),
+    $file->get_filearea(),
+    $file->get_itemid(),
+    $file->get_filepath(),
+    $file->get_filename()
+);
+
+echo "<div><img src=\"$fileurl\" id='bannerimage' /></div>";
+
 echo $OUTPUT->footer();
+
+

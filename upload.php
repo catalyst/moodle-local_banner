@@ -37,6 +37,7 @@ if (!has_capability('moodle/course:update', $coursecontext)) {
     die();
 }
 
+$posturl = new moodle_url('/local/banner/process.php', array('id' => $id));
 $url = new moodle_url('/local/banner/upload.php', array('id' => $id));
 $PAGE->set_url($url);
 
@@ -75,6 +76,8 @@ if ($mform->is_cancelled()) {
         }
 
     }
+
+    redirect($posturl);
 
 } else {
     $draftitemid = file_get_submitted_draft_itemid('banners');
