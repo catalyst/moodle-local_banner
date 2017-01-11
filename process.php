@@ -74,15 +74,16 @@ if ($mform->is_cancelled()) {
     $mform->set_data($record);
 }
 
-$params = array(
-    $record->cropx,
-    $record->cropy,
-    $record->scalex,
-    $record->scaley,
-    $record->height,
-    $record->width,
-    $record->rotate
-);
+// These parameters match the object used with cropper.js functions getData/setData.
+$params = array(array(
+    'x'      => intval($record->cropx),
+    'y'      => intval($record->cropy),
+    'scaleX' => intval($record->scalex),
+    'scaleY' => intval($record->scaley),
+    'height' => intval($record->height),
+    'width'  => intval($record->width),
+    'rotate' => intval($record->rotate),
+));
 
 $PAGE->requires->js_call_amd('local_banner/crop', 'cropper', $params);
 

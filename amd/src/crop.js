@@ -1,6 +1,6 @@
 define(['local_banner/cropper'], function (module) {
     return {
-        cropper: function(cropx, cropy, scalex, scaley, height, width, rotate) {
+        cropper: function(params) {
             var image = document.getElementById('bannerimage');
             var cropper = new Cropper(image, {
                 viewMode: 1,
@@ -8,24 +8,20 @@ define(['local_banner/cropper'], function (module) {
 
                 ready: function () {
                     var data = {
-                        x: parseInt(cropx),
-                        y: parseInt(cropy),
-                        scaleX: parseInt(scalex),
-                        scaleY: parseInt(scaley),
-                        height: parseInt(height),
-                        width: parseInt(width),
-                        rotate: parseInt(rotate)
-                    }
+                        x: params.x,
+                        y: params.y,
+                        scaleX: params.scaleX,
+                        scaleY: params.scaleY,
+                        height: params.height,
+                        width: params.width,
+                        rotate: params.rotate
+                    };
 
                     this.cropper.setData(data);
-
-                    console.log(data);
                 },
 
                 // Updating the values each time the crop changes.
                 crop: function(e) {
-                    var data = this.cropper.getData(true);
-
                     var cx = document.getElementsByName('cropx')[0];
                     var cy = document.getElementsByName('cropy')[0];
                     var sx = document.getElementsByName('scalex')[0];
@@ -33,7 +29,6 @@ define(['local_banner/cropper'], function (module) {
                     var h = document.getElementsByName('height')[0];
                     var w = document.getElementsByName('width')[0];
                     var r = document.getElementsByName('rotate')[0];
-
                     var data = this.cropper.getData(true);
 
                     cx.value = data.x;
