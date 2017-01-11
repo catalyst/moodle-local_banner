@@ -30,6 +30,7 @@ global $PAGE, $DB;
 $id = required_param('id', PARAM_INT);
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 $coursecontext = context_course::instance($course->id);
+$record = $DB->get_record('local_banner', array('course' => $id), '*', MUST_EXIST);
 
 require_login();
 
@@ -37,10 +38,8 @@ $url = new moodle_url('/local/banner/process.php', array('id' => $id));
 $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
-$PAGE->requires->js_call_amd('local_banner/crop', 'cropper');
-$PAGE->requires->css('/local/banner/css/cropper.css');
 
-$record = $DB->get_record('local_banner', array('course' => $id), '*', MUST_EXIST);
+$PAGE->requires->css('/local/banner/css/cropper.css');
 
 $fs = get_file_storage();
 
@@ -60,21 +59,36 @@ $mform = new \local_banner\form\process();
 if ($mform->is_cancelled()) {
 
 } else if ($data = $mform->get_data()) {
+    // Upon submission of the focal point, update the top left crop x/y.
+    $record->cropx = $data->cropx;
+    $record->cropy = $data->cropy;
+    $record->scalex = $data->scalex;
+    $record->scaley = $data->scaley;
+    $record->height = $data->height;
+    $record->width = $data->width;
+    $record->rotate = $data->rotate;
+    $DB->update_record('local_banner', $record);
 
 } else {
-    $data = new stdClass();
-    $data->cropx = $record->cropx;
-    $data->cropy = $record->cropy;
-
-    $mform->set_data($data);
+    $record->id = $id;
+    $mform->set_data($record);
 }
 
+$params = array(
+    $record->cropx,
+    $record->cropy,
+    $record->scalex,
+    $record->scaley,
+    $record->height,
+    $record->width,
+    $record->rotate
+);
+
+$PAGE->requires->js_call_amd('local_banner/crop', 'cropper', $params);
 
 echo $OUTPUT->header();
 
-echo "<div><img src=\"$fileurl\" id='bannerimage' /></div>";
-echo "<br/>x<input type='text' id='tx'>";
-echo "<br/>y<input type='text' id='ty'>";
+echo "<div><img src=\"$fileurl\" id='bannerimage' /></div><br />";
 
 echo $mform->display();
 

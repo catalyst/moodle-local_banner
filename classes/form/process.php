@@ -46,13 +46,22 @@ class process extends \moodleform {
         $mform = $this->_form;
 
         $mform->addElement('hidden', 'id');
-        $mform->setType('id', PARAM_INT);
-
         $mform->addElement('hidden', 'cropx');
-        $mform->setType('cropx', PARAM_INT);
-
         $mform->addElement('hidden', 'cropy');
+        $mform->addElement('hidden', 'scalex');
+        $mform->addElement('hidden', 'scaley');
+        $mform->addElement('hidden', 'height');
+        $mform->addElement('hidden', 'width');
+        $mform->addElement('hidden', 'rotate');
+
+        $mform->setType('id', PARAM_INT);
+        $mform->setType('cropx', PARAM_INT);
         $mform->setType('cropy', PARAM_INT);
+        $mform->setType('scalex', PARAM_INT);
+        $mform->setType('scaley', PARAM_INT);
+        $mform->setType('height', PARAM_INT);
+        $mform->setType('width', PARAM_INT);
+        $mform->setType('rotate', PARAM_INT);
 
         $this->add_action_buttons(true, get_string('setfocus', 'local_banner'));
     }
