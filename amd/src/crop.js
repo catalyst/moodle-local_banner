@@ -4,7 +4,7 @@ define(['local_banner/cropper'], function (module) {
             var image = document.getElementById('bannerimage');
             var cropper = new Cropper(image, {
                 viewMode: 1,
-                aspectRatio: 3 / 1,
+                aspectRatio: params.aspectRatio,
 
                 ready: function () {
                     var data = {

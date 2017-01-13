@@ -38,7 +38,7 @@ if ($ADMIN->fulltree) {
 
     $width = new admin_setting_configtext(
         'width',
-        get_string('width', 'local_banner'),
+        get_string('width',      'local_banner'),
         get_string('width_desc', 'local_banner'),
         null,
         PARAM_INT
@@ -46,23 +46,23 @@ if ($ADMIN->fulltree) {
 
     $height = new admin_setting_configtext(
         'height',
-        get_string('height', 'local_banner'),
+        get_string('height',      'local_banner'),
         get_string('height_desc', 'local_banner'),
         null,
         PARAM_INT
     );
 
     $ratio = new admin_setting_configselect(
-        'ratio',
-        get_string('ratio', 'local_banner'),
-        get_string('ratio_desc', 'local_banner'),
+        'aspectratio',
+        get_string('aspectratio',      'local_banner'),
+        get_string('aspectratio_desc', 'local_banner'),
         0,
-        [1, 2]
+        [3/1, 16/9, 16/10]
     );
 
     $defaultbanner = new admin_setting_configstoredfile(
         'defaultbanner',
-        get_string('defaultbanner', 'local_banner'),
+        get_string('defaultbanner',      'local_banner'),
         get_string('defaultbanner_desc', 'local_banner'),
         'local_banner'
     );

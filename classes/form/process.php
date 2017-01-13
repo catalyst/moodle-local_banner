@@ -46,6 +46,7 @@ class process extends \moodleform {
         $mform = $this->_form;
 
         $mform->addElement('hidden', 'id');
+        $mform->addElement('hidden', 'course');
         $mform->addElement('hidden', 'cropx');
         $mform->addElement('hidden', 'cropy');
         $mform->addElement('hidden', 'scalex');
@@ -55,6 +56,7 @@ class process extends \moodleform {
         $mform->addElement('hidden', 'rotate');
 
         $mform->setType('id', PARAM_INT);
+        $mform->setType('course', PARAM_INT);
         $mform->setType('cropx', PARAM_INT);
         $mform->setType('cropy', PARAM_INT);
         $mform->setType('scalex', PARAM_INT);

@@ -23,18 +23,20 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_banner\banner;
+
 require_once(__DIR__ . '/../../config.php');
 
 global $PAGE, $DB;
 
-$id = required_param('id', PARAM_INT);
+$id = required_param('course', PARAM_INT);
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 $coursecontext = context_course::instance($course->id);
-$record = $DB->get_record('local_banner', array('course' => $id), '*', MUST_EXIST);
+$banner = banner::load_from_courseid($course->id);
 
-require_login();
+require_login($course);
 
-$url = new moodle_url('/local/banner/process.php', array('id' => $id));
+$url = new moodle_url('/local/banner/process.php', array('course' => $course->id));
 $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
@@ -43,7 +45,7 @@ $PAGE->requires->css('/local/banner/css/cropper.css');
 
 $fs = get_file_storage();
 
-$file = $fs->get_file_by_id($record->file);
+$file = $fs->get_file_by_id($banner->file);
 
 $fileurl = moodle_url::make_pluginfile_url(
     $file->get_contextid(),
@@ -54,35 +56,31 @@ $fileurl = moodle_url::make_pluginfile_url(
     $file->get_filename()
 );
 
+
+
 $mform = new \local_banner\form\process();
 
 if ($mform->is_cancelled()) {
 
 } else if ($data = $mform->get_data()) {
     // Upon submission of the focal point, update the top left crop x/y.
-    $record->cropx = $data->cropx;
-    $record->cropy = $data->cropy;
-    $record->scalex = $data->scalex;
-    $record->scaley = $data->scaley;
-    $record->height = $data->height;
-    $record->width = $data->width;
-    $record->rotate = $data->rotate;
-    $DB->update_record('local_banner', $record);
+    $banner->set_data($data);
+    $banner->save();
 
 } else {
-    $record->id = $id;
-    $mform->set_data($record);
+    $mform->set_data($banner);
 }
 
 // These parameters match the object used with cropper.js functions getData/setData.
 $params = array(array(
-    'x'      => intval($record->cropx),
-    'y'      => intval($record->cropy),
-    'scaleX' => intval($record->scalex),
-    'scaleY' => intval($record->scaley),
-    'height' => intval($record->height),
-    'width'  => intval($record->width),
-    'rotate' => intval($record->rotate),
+    'aspectRatio' => get_config('aspectratio', 'local_banner'),
+    'x'           => intval($banner->cropx),
+    'y'           => intval($banner->cropy),
+    'scaleX'      => intval($banner->scalex),
+    'scaleY'      => intval($banner->scaley),
+    'height'      => intval($banner->height),
+    'width'       => intval($banner->width),
+    'rotate'      => intval($banner->rotate),
 ));
 
 $PAGE->requires->js_call_amd('local_banner/crop', 'cropper', $params);

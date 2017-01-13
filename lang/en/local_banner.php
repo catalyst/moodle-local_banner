@@ -28,3 +28,12 @@ defined('MOODLE_INTERNAL') || die();
 $string['pluginname'] = 'Course Banner';
 $string['uploadfile'] = 'Banner Upload';
 $string['setfocus'] = 'Set Focus';
+
+$string['width'] = '';
+$string['width_desc'] = '';
+$string['height'] = '';
+$string['height_desc'] = '';
+$string['aspectratio'] = '';
+$string['aspectratio_desc'] = '';
+$string['defaultbanner'] = '';
+$string['defaultbanner_desc'] = '';

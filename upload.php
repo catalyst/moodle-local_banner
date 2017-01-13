@@ -23,22 +23,24 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_banner\banner;
+
 require_once(__DIR__ . '/../../config.php');
 
 global $PAGE, $DB;
 
-$id = required_param('id', PARAM_INT);
+$id = required_param('course', PARAM_INT);
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 $coursecontext = context_course::instance($course->id);
 
-require_login();
+require_login($course);
 
 if (!has_capability('moodle/course:update', $coursecontext)) {
     die();
 }
 
-$posturl = new moodle_url('/local/banner/process.php', array('id' => $id));
-$url = new moodle_url('/local/banner/upload.php', array('id' => $id));
+$posturl = new moodle_url('/local/banner/process.php', array('course' => $course->id));
+$url = new moodle_url('/local/banner/upload.php', array('course' => $course->id));
 $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
@@ -49,14 +51,14 @@ if ($mform->is_cancelled()) {
 
 } else if ($data = $mform->get_data()) {
     $draftitemid = file_get_submitted_draft_itemid('banners');
-    file_save_draft_area_files($draftitemid, $coursecontext->id, 'local_banner', 'banners', $id);
+    file_save_draft_area_files($draftitemid, $coursecontext->id, 'local_banner', 'banners', 0);
 
     $fs = get_file_storage();
-    $files = $fs->get_area_files($coursecontext->id, 'local_banner', 'banners', $id);
+    $files = $fs->get_area_files($coursecontext->id, 'local_banner', 'banners', 0);
 
-    $record = $DB->get_record('local_banner', array('course' => $id));
-    if (empty($record)) {
-        $record = new stdClass();
+    $banner = banner::load_from_courseid($course->id);
+    if ($banner === null) {
+        $banner = new banner();
     }
 
     // We have set the file upload element to allow one file. This will iterate over the directory '.' and the file.
@@ -65,25 +67,20 @@ if ($mform->is_cancelled()) {
             continue;
         }
 
-        if (empty($record->id)) {
-            $record->course = $id;
-            $record->file = $file->get_id();
-            $DB->insert_record('local_banner', $record);
-        } else {
-            $record->file = $file->get_id();
-            $DB->update_record('local_banner', $record);
-        }
-
+        $banner->course = $course->id;
+        $banner->file = $file->get_id();
+        $banner->save();
+        break;
     }
 
     redirect($posturl);
 
 } else {
     $draftitemid = file_get_submitted_draft_itemid('banners');
-    file_prepare_draft_area($draftitemid, $coursecontext->id, 'local_banner', 'banners', $id);
+    file_prepare_draft_area($draftitemid, $coursecontext->id, 'local_banner', 'banners', $course->id);
 
     $data = new stdClass();
-    $data->id = $id;
+    $data->course = $course->id;
     $data->banners = $draftitemid;
 
     $mform->set_data($data);

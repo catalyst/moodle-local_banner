@@ -45,8 +45,8 @@ class upload extends \moodleform {
     public function definition() {
         $mform = $this->_form;
 
-        $mform->addElement('hidden', 'id');
-        $mform->setType('id', PARAM_INT);
+        $mform->addElement('hidden', 'course');
+        $mform->setType('course', PARAM_INT);
 
         $mform->addElement('filemanager', 'banners', get_string('uploadfile', 'local_banner'), null, array(
             'subdirs' => 0, 'maxfiles' => 1, 'accepted_types' => array('image')
