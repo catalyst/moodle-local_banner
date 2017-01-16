@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Banner generation.
+ * Banner test.
  *
  * @package    local_banner
  * @author     Nicholas Hoobin <nicholashoobin@catalyst-au.net>
@@ -25,12 +25,16 @@
 
 require_once(__DIR__ . '/../../config.php');
 
-global $PAGE;
+global $PAGE, $DB;
 
-$url = new moodle_url('/local/banner/banner.php');
+$id = required_param('course', PARAM_INT);
+$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+$coursecontext = context_course::instance($course->id);
+
+$url = new moodle_url('/local/banner/test.php', array('course' => $course->id));
 $PAGE->set_url($url);
-$PAGE->set_context(context_system::instance()); // TODO: Course context.
-$PAGE->set_pagelayout('standard');
+$PAGE->set_context($coursecontext);
 
-echo $OUTPUT->header();
-echo $OUTPUT->footer();
+$r = $PAGE->get_renderer('local_banner');
+echo $r->render_og_metadata($course);
+echo $r->render_banner($id);

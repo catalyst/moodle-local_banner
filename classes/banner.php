@@ -90,7 +90,7 @@ class banner {
         return new banner($data);
     }
 
-    public function set_data($data) {
+    private function set_data($data) {
         foreach ($data as $key => $value) {
             if (property_exists($this, $key)) {
                 $this->$key = $value;
@@ -107,5 +107,14 @@ class banner {
         foreach ($fs as $f) {
             $this->$f = ($this->$f === null) ? null : (int)$this->$f;
         }
+    }
+
+    public static function generate($id) {
+        $banner = self::load_from_courseid($id);
+
+        $fs = get_file_storage();
+        $file = $fs->get_file_by_id($banner->file);
+
+        send_stored_file($file, DAYSECS, 0, false);
     }
 }
