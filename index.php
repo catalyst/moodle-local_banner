@@ -29,9 +29,12 @@ require_once(__DIR__ . '/../../config.php');
 
 // TODO: Additional parameters for sizes of image.
 $id = optional_param('course', null, PARAM_INT);
+$width = optional_param('w', 0, PARAM_INT);
 
 if (empty($id)) {
     die();
 }
 
-banner::generate($id);
+$banner = banner::generate($id, $width);
+
+send_stored_file($banner, DAYSECS, 0, false);

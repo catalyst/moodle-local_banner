@@ -56,8 +56,6 @@ $fileurl = moodle_url::make_pluginfile_url(
     $file->get_filename()
 );
 
-
-
 $mform = new \local_banner\form\process();
 
 if ($mform->is_cancelled()) {
@@ -72,16 +70,9 @@ if ($mform->is_cancelled()) {
 }
 
 // These parameters match the object used with cropper.js functions getData/setData.
-$params = array(array(
-    'aspectRatio' => get_config('aspectratio', 'local_banner'),
-    'x'           => intval($banner->cropx),
-    'y'           => intval($banner->cropy),
-    'scaleX'      => intval($banner->scalex),
-    'scaleY'      => intval($banner->scaley),
-    'height'      => intval($banner->height),
-    'width'       => intval($banner->width),
-    'rotate'      => intval($banner->rotate),
-));
+$params = array(
+    array('banner' => $banner, 'config' => '1'),
+);
 
 $PAGE->requires->js_call_amd('local_banner/crop', 'cropper', $params);
 

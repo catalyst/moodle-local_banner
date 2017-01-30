@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if ($ADMIN->fulltree) {
+if ($hassiteconfig) {
     $settings = new admin_settingpage('local_banner', get_string('pluginname', 'local_banner'));
 
     $ADMIN->add('localplugins', $settings);
@@ -37,31 +37,40 @@ if ($ADMIN->fulltree) {
     );
 
     $width = new admin_setting_configtext(
-        'width',
+        'local_banner/width',
         get_string('width',      'local_banner'),
         get_string('width_desc', 'local_banner'),
-        null,
+        1000,
         PARAM_INT
     );
 
     $height = new admin_setting_configtext(
-        'height',
+        'local_banner/height',
         get_string('height',      'local_banner'),
         get_string('height_desc', 'local_banner'),
-        null,
+        120,
         PARAM_INT
     );
 
-    $ratio = new admin_setting_configselect(
-        'aspectratio',
+    $ratio = new admin_setting_configtext(
+        'local_banner/aspectratio',
         get_string('aspectratio',      'local_banner'),
         get_string('aspectratio_desc', 'local_banner'),
-        0,
-        [3/1, 16/9, 16/10]
+        '3/1',
+        '/^\d+\.?(\d*)?[.:\/]?(\d*)?$/'
+        /*
+        '/
+        ^\d+    # Starts with digits,         16
+        \.?     # Optional period,            16.
+        (\d*)?  # Optional more digits        16.18
+        [.:\/]? # Optional either \ : or .    16.18:
+        (\d*)?$ # Optional ending with digits 16.18:10
+        /x'    // PCRE_EXTENDED
+        */
     );
 
     $defaultbanner = new admin_setting_configstoredfile(
-        'defaultbanner',
+        'local_banner/defaultbanner',
         get_string('defaultbanner',      'local_banner'),
         get_string('defaultbanner_desc', 'local_banner'),
         'local_banner'

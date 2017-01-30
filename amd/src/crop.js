@@ -4,17 +4,17 @@ define(['local_banner/cropper'], function (module) {
             var image = document.getElementById('bannerimage');
             var cropper = new Cropper(image, {
                 viewMode: 1,
-                aspectRatio: params.aspectRatio,
+                //aspectRatio: 3,
 
                 ready: function () {
                     var data = {
-                        x: params.x,
-                        y: params.y,
-                        scaleX: params.scaleX,
-                        scaleY: params.scaleY,
-                        height: params.height,
-                        width: params.width,
-                        rotate: params.rotate
+                        x: params.banner.cropx,
+                        y: params.banner.cropy,
+                        scaleX: params.banner.scaleX,
+                        scaleY: params.banner.scaleY,
+                        height: params.banner.height,
+                        width: params.banner.width,
+                        rotate: params.banner.rotate
                     };
 
                     this.cropper.setData(data);

@@ -51,10 +51,10 @@ if ($mform->is_cancelled()) {
 
 } else if ($data = $mform->get_data()) {
     $draftitemid = file_get_submitted_draft_itemid('banners');
-    file_save_draft_area_files($draftitemid, $coursecontext->id, 'local_banner', 'banners', 0);
+    file_save_draft_area_files($draftitemid, $coursecontext->id, 'local_banner', 'banners', banner::BANNER_DEFAULT);
 
     $fs = get_file_storage();
-    $files = $fs->get_area_files($coursecontext->id, 'local_banner', 'banners', 0);
+    $files = $fs->get_area_files($coursecontext->id, 'local_banner', 'banners', banner::BANNER_DEFAULT);
 
     $banner = banner::load_from_courseid($course->id);
     if ($banner === null) {
@@ -68,7 +68,9 @@ if ($mform->is_cancelled()) {
         }
 
         $banner->course = $course->id;
+        $banner->context = $coursecontext->id;
         $banner->file = $file->get_id();
+        $banner->filename = $file->get_filename();
         $banner->save();
         break;
     }
@@ -77,7 +79,7 @@ if ($mform->is_cancelled()) {
 
 } else {
     $draftitemid = file_get_submitted_draft_itemid('banners');
-    file_prepare_draft_area($draftitemid, $coursecontext->id, 'local_banner', 'banners', $course->id);
+    file_prepare_draft_area($draftitemid, $coursecontext->id, 'local_banner', 'banners', banner::BANNER_DEFAULT);
 
     $data = new stdClass();
     $data->course = $course->id;

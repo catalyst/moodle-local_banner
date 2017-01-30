@@ -26,9 +26,15 @@
 namespace local_banner;
 
 class banner {
+    const BANNER_DEFAULT = 0;
+
+    const BANNER_PLACEHOLDER = 1;
+
     public $id = null;
 
     public $course = null;
+
+    public $context = null;
 
     public $file = null;
 
@@ -45,6 +51,8 @@ class banner {
     public $width = null;
 
     public $rotate = null;
+
+    public $filename = null;
 
     public function __construct($data = null) {
         if (is_null($data)) {
@@ -83,14 +91,15 @@ class banner {
 
         $data = $DB->get_record('local_banner', array('course' => $courseid));
 
+        // No file has been uploaded for the context of this course.
         if ($data === false) {
-            return null;
+            return new banner(self::placeholder($courseid));
         }
 
         return new banner($data);
     }
 
-    private function set_data($data) {
+    public function set_data($data) {
         foreach ($data as $key => $value) {
             if (property_exists($this, $key)) {
                 $this->$key = $value;
@@ -98,23 +107,122 @@ class banner {
         }
     }
 
+    private static function placeholder($course) {
+        $data = array(
+            'context' => self::BANNER_PLACEHOLDER,
+            'filename' => 'banner',
+            'course' =>  $course,
+        );
+
+        return $data;
+    }
+
+    private function parse_ratio() {
+        $config = get_config('local_banner', 'aspectratio');
+
+        if ($exploded = explode(':', $config) || $exploded = explode('/', $config)) {
+            return $exploded[0] / $exploded[1];
+        }
+
+        return $config;
+    }
+
     /**
      * Converts the type of the fields as needed.
      */
     private function adjust_field_types() {
         // Adjust int fields.
-        $fs = array('id', 'course', 'file', 'cropx', 'cropy', 'scalex', 'scaley', 'height', 'width', 'rotate');
+        $fs = array('id', 'course', 'context', 'file', 'cropx', 'cropy', 'scalex', 'scaley', 'height', 'width', 'rotate');
         foreach ($fs as $f) {
             $this->$f = ($this->$f === null) ? null : (int)$this->$f;
         }
     }
 
-    public static function generate($id) {
-        $banner = self::load_from_courseid($id);
+    public static function generate($courseid, $itemid) {
+        $banner = self::load_from_courseid($courseid);
 
         $fs = get_file_storage();
-        $file = $fs->get_file_by_id($banner->file);
 
-        send_stored_file($file, DAYSECS, 0, false);
+        // Try to obtain the file with the width $itemid.
+        $file = $fs->get_area_files($banner->context, 'local_banner', 'banners', $itemid, 'itemid', false);
+
+        // File does not exist. Create it.
+        if(empty($file)) {
+            return $banner->create_file($itemid);
+        }
+
+        return array_shift($file);
+    }
+
+    private function create_file($itemid) {
+        $dir = make_request_directory();
+        $tmpfile = tempnam($dir, 'banner_');
+
+        $handle = fopen($tmpfile, "w");
+        $this->image_crop($handle, $itemid);
+        fclose($handle);
+
+        // TODO: Temporarily returning. Lets not save anything to the database right now.
+        return;
+
+        $basename = pathinfo($this->filename, PATHINFO_FILENAME);
+        $extension = pathinfo($this->filename, PATHINFO_EXTENSION);
+
+        $record = array(
+            'contextid' => $this->context,
+            'component' => 'local_banner',
+            'filearea' => 'banners',
+            'itemid' => $itemid,
+            'filepath' => '/',
+            'filename' => $basename . '-' . $itemid . '.' . $extension,
+        );
+
+        $fs = get_file_storage();
+        return $fs->create_file_from_pathname($record, $tmpfile);
+    }
+
+    private function image_crop($write, $itemid) {
+        $fs = get_file_storage();
+        $source = $fs->get_file_by_id($this->file);
+
+        $imageinfo = @getimagesizefromstring($source->get_content());
+        if (empty($imageinfo)) {
+            return false;
+        }
+
+        // Create a new image from the file.
+        $original = @imagecreatefromstring($source->get_content());
+        if (empty($original)) {
+            return false;
+        }
+
+        // The canvas we write to has the max width and height specified in the plugin config.
+        $canvaswidth = get_config('local_banner', 'width');
+        $canvasheight = get_config('local_banner', 'height');
+        $canvas = imagecreatetruecolor($canvaswidth, $canvasheight);
+
+        // Create a transparent canvas.
+        imagealphablending($canvas, false);
+        imagefill($canvas, 0, 0, imagecolorallocatealpha($canvas, 0, 0, 0, 127));
+        imagesavealpha($canvas, true);
+
+        $dst_x = 0; // x-coordinate of destination point.
+        $dst_y = 0; // y-coordinate of destination point.
+        $src_x = $this->cropx; // x-coordinate of source point.
+        $src_y = $this->cropy; // y-coordinate of source point.
+        $dst_w = $imageinfo[0]; // Destination width.
+        $dst_h = $imageinfo[1]; // Destination height.
+        $src_w = $imageinfo[0]; // Source width.
+        $src_h = $imageinfo[1]; // Source height.
+
+        // Lets crop!
+        imagecopyresampled($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
+
+        // TODO: Temp debugging output. Replace with sendfile of the saved content.
+        header('Content-Type: image/png');
+        imagepng($canvas, null, 9);
+
+        imagedestroy($original);
+        imagedestroy($canvas);
     }
 }
