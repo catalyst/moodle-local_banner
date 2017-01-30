@@ -25,6 +25,8 @@
 
 namespace local_banner;
 
+use moodle_url;
+
 class banner {
     const BANNER_DEFAULT = 0;
 
@@ -224,5 +226,21 @@ class banner {
 
         imagedestroy($original);
         imagedestroy($canvas);
+    }
+
+    public static function render_style() {
+        global $PAGE, $COURSE;
+        $banner = self::load_from_courseid($COURSE->id);
+
+        $r = $PAGE->get_renderer('local_banner');
+        $html = $r->render_style($COURSE->id, $banner->cropx);
+        return $html;
+    }
+
+    public static function render_og_metadata() {
+        global $PAGE, $COURSE;
+        $r = $PAGE->get_renderer('local_banner');
+        $html = $r->render_og_metadata($COURSE->id);
+        return $html;
     }
 }

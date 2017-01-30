@@ -37,4 +37,4 @@ $PAGE->set_context($coursecontext);
 
 $r = $PAGE->get_renderer('local_banner');
 echo $r->render_og_metadata($course);
-echo $r->render_banner($id);
+echo $r->render_style($course->id, 500);

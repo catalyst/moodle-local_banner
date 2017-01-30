@@ -41,11 +41,19 @@ class local_banner_renderer extends plugin_renderer_base {
      *
      * @return string $out The html output.
      */
-    public function render_banner($course) {
-        $params = array('course' => $course);
+    public function render_style($courseid, $width) {
+        $params = array('course' => $courseid, 'w' => $width);
         $src = new moodle_url('/local/banner/', $params);
-        $img = html_writer::img($src, '');
-        return $img;
+
+        $class = "<style>
+@media (min-width: 992px) {
+    .moodleheader {
+        background-image: url('{$src->out(false)}');
+    }
+}
+</style>";
+
+        return $class;
     }
 
     public function render_og_metadata($course) {
