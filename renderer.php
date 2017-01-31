@@ -61,10 +61,10 @@ class local_banner_renderer extends plugin_renderer_base {
 
         $uploadurl = new moodle_url('/local/banner/upload.php', $params);
         $deleteurl = new moodle_url('/local/banner/delete.php', $params);
-        $processurl = new moodle_url('/local/banner/process.php', $params);
+        $focusurl = new moodle_url('/local/banner/focus.php', $params);
 
         $html  = html_writer::start_div();
-        $html .= html_writer::link($processurl, 'Change focus point');
+        $html .= html_writer::link($focusurl, 'Change focus point');
         $html .= html_writer::link($uploadurl, 'Replace Banner');
         $html .= html_writer::link($deleteurl, 'Remove Banner');
         $html .= html_writer::end_div();

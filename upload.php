@@ -40,7 +40,7 @@ if (!has_capability('moodle/course:update', $coursecontext)) {
     die();
 }
 
-$posturl = new moodle_url('/local/banner/process.php', array('course' => $course->id, 'sesskey' => sesskey()));
+$posturl = new moodle_url('/local/banner/focus.php', array('course' => $course->id, 'sesskey' => sesskey()));
 $url = new moodle_url('/local/banner/upload.php', array('course' => $course->id));
 $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);
