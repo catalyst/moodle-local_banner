@@ -29,12 +29,14 @@ require_once(__DIR__ . '/../../config.php');
 
 global $PAGE, $DB;
 
+
 $id = required_param('course', PARAM_INT);
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 $coursecontext = context_course::instance($course->id);
 $banner = banner::load_from_courseid($course->id);
 
 require_login($course);
+require_sesskey();
 
 $url = new moodle_url('/local/banner/process.php', array('course' => $course->id));
 $PAGE->set_url($url);

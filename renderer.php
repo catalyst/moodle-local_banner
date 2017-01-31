@@ -47,27 +47,41 @@ class local_banner_renderer extends plugin_renderer_base {
 
         $class = "<style>
 @media (min-width: 992px) {
-    .moodleheader {
-        background-image: url('{$src->out(false)}');
-    }
+  .moodleheader {
+    background-image: url('{$src->out(false)}');
+  }
 }
 </style>";
 
         return $class;
     }
 
-    public function render_og_metadata($course) {
-        global $PAGE, $SITE;
+    public function render_edit_buttons($courseid, $sesskey) {
+        $params = array('course' => $courseid, 'sesskey' => $sesskey);
 
-        $params = array('course' => $course->id);
+        $uploadurl = new moodle_url('/local/banner/upload.php', $params);
+        $deleteurl = new moodle_url('/local/banner/delete.php', $params);
+        $processurl = new moodle_url('/local/banner/process.php', $params);
+
+        $html  = html_writer::start_div();
+        $html .= html_writer::link($processurl, 'Change focus point');
+        $html .= html_writer::link($uploadurl, 'Replace Banner');
+        $html .= html_writer::link($deleteurl, 'Remove Banner');
+        $html .= html_writer::end_div();
+
+        return $html;
+    }
+
+    public function render_og_metadata($courseid, $url, $fullname, $summary) {
+        $params = array('course' => $courseid);
         $src = new moodle_url('/local/banner/', $params);
 
         $data = array(
-            'og:title' => $course->fullname,
+            'og:title' => $fullname,
             'og:type' => 'website',
-            'og:url' => $PAGE->url->out(),
-            'og:site_name' => $SITE->fullname,
-            'og:description' => $course->summary,
+            'og:url' => $url,
+            'og:site_name' => $fullname,
+            'og:description' => $summary,
             'og:image' => $src->out(),
             // 'og:image:width'
             // 'og:image:height'

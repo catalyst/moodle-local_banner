@@ -238,9 +238,28 @@ class banner {
     }
 
     public static function render_og_metadata() {
-        global $PAGE, $COURSE;
+        global $PAGE, $COURSE, $SITE;
+
+        $url = $PAGE->url->out();
+        $fullname = $SITE->fullname;
+        $summary = $COURSE->summary;
+
         $r = $PAGE->get_renderer('local_banner');
-        $html = $r->render_og_metadata($COURSE->id);
+        $html = $r->render_og_metadata($COURSE->id, $url, $fullname, $summary);
         return $html;
+    }
+
+    public static function render_edit_buttons() {
+        global $PAGE, $COURSE, $USER;
+
+        if (isset($USER->editing) && $USER->editing) {
+            $r = $PAGE->get_renderer('local_banner');
+            $html = $r->render_edit_buttons($COURSE->id, sesskey());
+            return $html;
+        }
+    }
+
+    public static function render_banner() {
+        return self::render_style() . self::render_edit_buttons();
     }
 }

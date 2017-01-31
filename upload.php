@@ -34,12 +34,13 @@ $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 $coursecontext = context_course::instance($course->id);
 
 require_login($course);
+require_sesskey();
 
 if (!has_capability('moodle/course:update', $coursecontext)) {
     die();
 }
 
-$posturl = new moodle_url('/local/banner/process.php', array('course' => $course->id));
+$posturl = new moodle_url('/local/banner/process.php', array('course' => $course->id, 'sesskey' => sesskey()));
 $url = new moodle_url('/local/banner/upload.php', array('course' => $course->id));
 $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);

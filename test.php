@@ -25,7 +25,7 @@
 
 require_once(__DIR__ . '/../../config.php');
 
-global $PAGE, $DB;
+global $PAGE, $DB, $SITE;
 
 $id = required_param('course', PARAM_INT);
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
@@ -35,6 +35,9 @@ $url = new moodle_url('/local/banner/test.php', array('course' => $course->id));
 $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);
 
+$url = $PAGE->url->out();
+$fullname = $SITE->fullname;
+
 $r = $PAGE->get_renderer('local_banner');
-echo $r->render_og_metadata($course);
+echo $r->render_og_metadata($course->id, $url, $course->fullname, $course->summary);
 echo $r->render_style($course->id, 500);
