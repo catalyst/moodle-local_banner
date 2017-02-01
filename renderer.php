@@ -41,8 +41,8 @@ class local_banner_renderer extends plugin_renderer_base {
      *
      * @return string $out The html output.
      */
-    public function render_style($courseid, $width) {
-        $params = array('course' => $courseid, 'w' => $width);
+    public function render_style($courseid) {
+        $params = array('course' => $courseid);
         $src = new moodle_url('/local/banner/', $params);
 
         $class = "<style>
@@ -56,7 +56,7 @@ class local_banner_renderer extends plugin_renderer_base {
         return $class;
     }
 
-    public function render_edit_buttons($courseid, $sesskey) {
+    public function render_edit_buttons($courseid, $banner, $sesskey) {
         $params = array('course' => $courseid, 'sesskey' => $sesskey);
 
         $uploadurl = new moodle_url('/local/banner/upload.php', $params);
@@ -64,7 +64,11 @@ class local_banner_renderer extends plugin_renderer_base {
         $focusurl = new moodle_url('/local/banner/focus.php', $params);
 
         $html  = html_writer::start_div();
-        $html .= html_writer::link($focusurl, 'Change focus point');
+
+        if (!empty($banner)) {
+            $html .= html_writer::link($focusurl, 'Change focus point');
+        }
+
         $html .= html_writer::link($uploadurl, 'Replace Banner');
         $html .= html_writer::link($deleteurl, 'Remove Banner');
         $html .= html_writer::end_div();

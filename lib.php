@@ -67,5 +67,5 @@ function local_banner_pluginfile($course, $cm, $context, $filearea, $args, $forc
         return false;
     }
 
-    send_stored_file($file, DAYSECS, 0, false);
+    send_stored_file($file, 0, 0, false);
 }

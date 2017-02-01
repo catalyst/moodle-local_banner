@@ -29,7 +29,6 @@ require_once(__DIR__ . '/../../config.php');
 
 global $PAGE, $DB;
 
-
 $id = required_param('course', PARAM_INT);
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 $coursecontext = context_course::instance($course->id);
@@ -47,6 +46,7 @@ $PAGE->requires->css('/local/banner/css/cropper.css');
 
 $fs = get_file_storage();
 
+// Obtain the original uploaded file.
 $file = $fs->get_file_by_id($banner->file);
 
 $fileurl = moodle_url::make_pluginfile_url(
@@ -64,6 +64,7 @@ if ($mform->is_cancelled()) {
 
 } else if ($data = $mform->get_data()) {
     // Upon submission of the focal point, update the top left crop x/y.
+    $banner->invalidate_banner();
     $banner->set_data($data);
     $banner->save();
 
@@ -80,10 +81,10 @@ $PAGE->requires->js_call_amd('local_banner/crop', 'cropper', $params);
 
 echo $OUTPUT->header();
 
-echo "<div><img src=\"$fileurl\" id='bannerimage' /></div><br />";
+$img = html_writer::img($fileurl, '', array('id' => 'bannerimage'));
+echo html_writer::div($img);
+echo html_writer::empty_tag('br');
 
 echo $mform->display();
 
 echo $OUTPUT->footer();
-
-

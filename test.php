@@ -40,4 +40,4 @@ $fullname = $SITE->fullname;
 
 $r = $PAGE->get_renderer('local_banner');
 echo $r->render_og_metadata($course->id, $url, $course->fullname, $course->summary);
-echo $r->render_style($course->id, 500);
+echo $r->render_style($course->id);

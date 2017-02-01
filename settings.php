@@ -73,7 +73,7 @@ if ($hassiteconfig) {
         'local_banner/defaultbanner',
         get_string('defaultbanner',      'local_banner'),
         get_string('defaultbanner_desc', 'local_banner'),
-        'local_banner'
+        'placeholder'
     );
 
     $settings->add($heading);

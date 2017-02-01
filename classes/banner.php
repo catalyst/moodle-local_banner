@@ -25,7 +25,9 @@
 
 namespace local_banner;
 
-use moodle_url;
+use context_system;
+
+require_once($CFG->libdir . '/filelib.php');
 
 class banner {
     const BANNER_DEFAULT = 0;
@@ -56,18 +58,24 @@ class banner {
 
     public $filename = null;
 
+    private $fs = null;
+
     public function __construct($data = null) {
+        $this->fs = get_file_storage();
+
         if (is_null($data)) {
             return;
         }
 
         $this->set_data($data);
-
         $this->adjust_field_types();
     }
 
     public function save() {
         global $DB;
+
+        // Fix the types before updating the database.
+        $this->adjust_field_types();
 
         if (empty($this->id)) {
             return $DB->insert_record('local_banner', $this);
@@ -76,16 +84,17 @@ class banner {
         }
     }
 
-    public static function load_from_id($id) {
+    public static function load_from_id($bannerid) {
         global $DB;
 
-        $data = $DB->get_record('local_banner', array('id' => $id));
+        $data = $DB->get_record('local_banner', array('id' => $bannerid));
 
-        if ($data === false) {
-            return null;
+        if ($data !== false) {
+            return new banner($data);
         }
 
-        return new banner($data);
+        // No record exists for $bannerid.
+        return false;
     }
 
     public static function load_from_courseid($courseid) {
@@ -93,12 +102,12 @@ class banner {
 
         $data = $DB->get_record('local_banner', array('course' => $courseid));
 
-        // No file has been uploaded for the context of this course.
-        if ($data === false) {
-            return new banner(self::placeholder($courseid));
+        if ($data !== false) {
+            return new banner($data);
         }
 
-        return new banner($data);
+        // No record exists for $courseid.
+        return false;
     }
 
     public function set_data($data) {
@@ -109,14 +118,50 @@ class banner {
         }
     }
 
-    private static function placeholder($course) {
+    /**
+     * Converts the type of the fields as needed.
+     */
+    private function adjust_field_types() {
+        // Adjust int fields.
+        $ft = array('id', 'course', 'context', 'file', 'cropx', 'cropy', 'scalex', 'scaley', 'height', 'width', 'rotate');
+        foreach ($ft as $f) {
+            $this->$f = ($this->$f === null) ? null : (int)$this->$f;
+        }
+    }
+
+    private static function load_placeholder() {
+        $fs = get_file_storage();
+        $context = context_system::instance();
+        $defaultfilename = get_config('local_banner', 'defaultbanner');
+        $pathinfo = pathinfo($defaultfilename);
+
+        $file = $fs->get_file($context->id, 'local_banner', 'placeholder', 0, $pathinfo['dirname'], $pathinfo['basename']);
+
+        // Set default x/y coordinates.
+        $imageinfo = @getimagesizefromstring($file->get_content());
+        $canvaswidth = get_config('local_banner', 'width');
+        $canvasheight = get_config('local_banner', 'height');
+        $cropx = ($imageinfo[0] / 2) - ($canvaswidth / 2);
+        $cropy = ($imageinfo[1] / 2) - ($canvasheight / 2);
+
+        // No placeholder has been found.
+        if (empty($file)) {
+            return false;
+        }
+
+        // Construct basic $data for a simple banner.
         $data = array(
             'context' => self::BANNER_PLACEHOLDER,
-            'filename' => 'banner',
-            'course' =>  $course,
+            'course' =>  self::BANNER_PLACEHOLDER,
+            /*
+            'file' => $file->get_id(),
+            'filename' =>  $pathinfo['basename'],
+            'cropx' => $cropx,
+            'cropy' => $cropy,
+            */
         );
 
-        return $data;
+        return new banner($data);
     }
 
     private function parse_ratio() {
@@ -129,31 +174,66 @@ class banner {
         return $config;
     }
 
-    /**
-     * Converts the type of the fields as needed.
-     */
-    private function adjust_field_types() {
-        // Adjust int fields.
-        $fs = array('id', 'course', 'context', 'file', 'cropx', 'cropy', 'scalex', 'scaley', 'height', 'width', 'rotate');
-        foreach ($fs as $f) {
-            $this->$f = ($this->$f === null) ? null : (int)$this->$f;
-        }
-    }
-
-    public static function generate($courseid, $itemid) {
+    public static function generate($courseid, $width, $original) {
+        // Check to see if a banner exists.
         $banner = self::load_from_courseid($courseid);
 
-        $fs = get_file_storage();
+        if (empty($banner)) {
+            $banner = self::load_placeholder();
+        }
 
-        // Try to obtain the file with the width $itemid.
-        $file = $fs->get_area_files($banner->context, 'local_banner', 'banners', $itemid, 'itemid', false);
+        // When not viewing a course, provide the default banner.
+        if ($courseid == 1) {
+            $path = get_config('local_banner', 'defaultbanner');
+            $file = $banner->fs->get_file(1, 'local_banner', 'placeholder', 0, '/', $path);
+            return $file;
+        }
+
+        if ($original) {
+            $itemid = banner::BANNER_DEFAULT;
+        } elseif ($width) {
+            // Allow generation of custom width banners.
+            $itemid = $width;
+        } else {
+            // Obtain the course banner that has the itemid of the admin setting width.
+            $itemid = get_config('local_banner', 'width');
+        }
+
+        /*
+         * Try to obtain the file with the width $itemid.
+         * The false argument prevents directory lookup.
+         * When specifying $itemid this _should_ return an array of one element.
+         */
+        $filearray = $banner->fs->get_area_files($banner->context, 'local_banner', 'banners', $itemid, 'itemid', false);
+        $file = array_shift($filearray);
 
         // File does not exist. Create it.
         if(empty($file)) {
-            return $banner->create_file($itemid);
+
+            // No file has been saved for this course, return the default banner.
+            if (empty($banner->file)) {
+                $path = get_config('local_banner', 'defaultbanner');
+                $file = $banner->fs->get_file(1, 'local_banner', 'placeholder', 0, '/', $path);
+
+            } else {
+                // This course has a banner fileid assigned to it. Lets create the banner / crop it again.
+                $file = $banner->create_file($itemid);
+            }
+
         }
 
-        return array_shift($file);
+        return $file;
+    }
+
+    public function invalidate_banner() {
+        $itemid = get_config('local_banner', 'width');
+
+        $files = $this->fs->get_area_files($this->context, 'local_banner', 'banners', false, 'itemid', false);
+        foreach ($files as $file) {
+            if ($file->get_itemid() != banner::BANNER_DEFAULT) {
+                $file->delete();
+            }
+        }
     }
 
     private function create_file($itemid) {
@@ -161,14 +241,10 @@ class banner {
         $tmpfile = tempnam($dir, 'banner_');
 
         $handle = fopen($tmpfile, "w");
-        $this->image_crop($handle, $itemid);
+        $this->image_crop($tmpfile);
         fclose($handle);
 
-        // TODO: Temporarily returning. Lets not save anything to the database right now.
-        return;
-
-        $basename = pathinfo($this->filename, PATHINFO_FILENAME);
-        $extension = pathinfo($this->filename, PATHINFO_EXTENSION);
+        $pathinfo = pathinfo($this->filename);
 
         $record = array(
             'contextid' => $this->context,
@@ -176,23 +252,27 @@ class banner {
             'filearea' => 'banners',
             'itemid' => $itemid,
             'filepath' => '/',
-            'filename' => $basename . '-' . $itemid . '.' . $extension,
+            'filename' => $pathinfo['filename'] . '-' . $itemid . '.' . $pathinfo['extension'],
+            'mimetype' => get_mimetype_for_sending($pathinfo['basename']),
+            'source' => $pathinfo['basename'],
         );
 
-        $fs = get_file_storage();
-        return $fs->create_file_from_pathname($record, $tmpfile);
+        return $this->fs->create_file_from_pathname($record, $tmpfile);
     }
 
-    private function image_crop($write, $itemid) {
-        $fs = get_file_storage();
-        $source = $fs->get_file_by_id($this->file);
+    private function image_crop($tmpfile) {
+        $source = $this->fs->get_file_by_id($this->file);
+
+        if (empty($source)) {
+            return false;
+        }
 
         $imageinfo = @getimagesizefromstring($source->get_content());
         if (empty($imageinfo)) {
             return false;
         }
 
-        // Create a new image from the file.
+        // Create a new image from the file that we can process.
         $original = @imagecreatefromstring($source->get_content());
         if (empty($original)) {
             return false;
@@ -220,20 +300,19 @@ class banner {
         // Lets crop!
         imagecopyresampled($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
 
-        // TODO: Temp debugging output. Replace with sendfile of the saved content.
-        header('Content-Type: image/png');
-        imagepng($canvas, null, 9);
+        // Write the canvas to the temporary file.
+        imagepng($canvas, $tmpfile, 9);
 
+        // Cleanup.
         imagedestroy($original);
         imagedestroy($canvas);
     }
 
     public static function render_style() {
         global $PAGE, $COURSE;
-        $banner = self::load_from_courseid($COURSE->id);
 
         $r = $PAGE->get_renderer('local_banner');
-        $html = $r->render_style($COURSE->id, $banner->cropx);
+        $html = $r->render_style($COURSE->id);
         return $html;
     }
 
@@ -252,9 +331,16 @@ class banner {
     public static function render_edit_buttons() {
         global $PAGE, $COURSE, $USER;
 
+        $banner = self::load_from_courseid($COURSE->id);
+
+        // Only allow modification of banners in the course context.
+        if ($PAGE->context->contextlevel != CONTEXT_COURSE) {
+            return;
+        }
+
         if (isset($USER->editing) && $USER->editing) {
             $r = $PAGE->get_renderer('local_banner');
-            $html = $r->render_edit_buttons($COURSE->id, sesskey());
+            $html = $r->render_edit_buttons($COURSE->id, $banner, sesskey());
             return $html;
         }
     }

@@ -58,7 +58,7 @@ if ($mform->is_cancelled()) {
     $files = $fs->get_area_files($coursecontext->id, 'local_banner', 'banners', banner::BANNER_DEFAULT);
 
     $banner = banner::load_from_courseid($course->id);
-    if ($banner === null) {
+    if ($banner === false) {
         $banner = new banner();
     }
 
