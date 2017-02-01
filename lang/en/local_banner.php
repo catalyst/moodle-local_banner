@@ -25,6 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['deletefile'] = 'Remove Banner';
+$string['deletefilenotification'] = 'You are about to remove the banner for this course.';
 $string['pluginname'] = 'Course Banner';
 $string['uploadfile'] = 'Banner Upload';
 $string['setfocus'] = 'Set Focus';

@@ -27,7 +27,6 @@ use local_banner\banner;
 
 require_once(__DIR__ . '/../../config.php');
 
-// TODO: Additional parameters for sizes of image.
 $id = optional_param('course', null, PARAM_INT);
 $width = optional_param('w', 0, PARAM_INT);
 $original = optional_param('original', 0, PARAM_INT);

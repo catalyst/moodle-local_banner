@@ -70,7 +70,10 @@ class local_banner_renderer extends plugin_renderer_base {
         }
 
         $html .= html_writer::link($uploadurl, 'Replace Banner');
-        $html .= html_writer::link($deleteurl, 'Remove Banner');
+
+        if (!empty($banner)) {
+            $html .= html_writer::link($deleteurl, 'Remove Banner');
+        }
         $html .= html_writer::end_div();
 
         return $html;

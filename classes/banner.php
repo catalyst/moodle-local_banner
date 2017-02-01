@@ -84,6 +84,17 @@ class banner {
         }
     }
 
+    public function delete() {
+        global $DB;
+
+        $purge = true;
+        $this->invalidate_banner($purge);
+
+        if (!empty($this->id)) {
+            return $DB->delete_records('local_banner', array('id' => $this->id));
+        }
+    }
+
     public static function load_from_id($bannerid) {
         global $DB;
 
@@ -182,10 +193,19 @@ class banner {
             $banner = self::load_placeholder();
         }
 
+        // No placeholder has been found.
+        if (empty($banner)) {
+            return false;
+        }
+
         // When not viewing a course, provide the default banner.
         if ($courseid == 1) {
             $path = get_config('local_banner', 'defaultbanner');
-            $file = $banner->fs->get_file(1, 'local_banner', 'placeholder', 0, '/', $path);
+
+            // This is the file that has been saved in the admin config settings.
+            $context = 1;
+            $itemid = 0;
+            $file = $banner->fs->get_file($context, 'local_banner', 'placeholder', $itemid, '/', $path);
             return $file;
         }
 
@@ -225,12 +245,12 @@ class banner {
         return $file;
     }
 
-    public function invalidate_banner() {
-        $itemid = get_config('local_banner', 'width');
-
+    public function invalidate_banner($purge = false) {
         $files = $this->fs->get_area_files($this->context, 'local_banner', 'banners', false, 'itemid', false);
         foreach ($files as $file) {
-            if ($file->get_itemid() != banner::BANNER_DEFAULT) {
+            if ($purge) {
+                $file->delete();
+            } elseif ($file->get_itemid() != banner::BANNER_DEFAULT) {
                 $file->delete();
             }
         }

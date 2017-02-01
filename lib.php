@@ -25,6 +25,16 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+function local_banner_invalidate_callback($name) {
+    global $DB;
+
+    $records = $DB->get_records('local_banner', null, '', 'id');
+    foreach ($records as $record) {
+        $banner = \local_banner\banner::load_from_id($record->id);
+        $banner->invalidate_banner();
+    }
+}
+
 /**
  * Serves the extension files.
  *

@@ -26,6 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
+    require_once($CFG->dirroot.'/local/banner/lib.php');
+
     $settings = new admin_settingpage('local_banner', get_string('pluginname', 'local_banner'));
 
     $ADMIN->add('localplugins', $settings);
@@ -75,6 +77,10 @@ if ($hassiteconfig) {
         get_string('defaultbanner_desc', 'local_banner'),
         'placeholder'
     );
+
+    $width->set_updatedcallback('local_banner_invalidate_callback');
+    $height->set_updatedcallback('local_banner_invalidate_callback');
+    $ratio->set_updatedcallback('local_banner_invalidate_callback');
 
     $settings->add($heading);
     $settings->add($width);
