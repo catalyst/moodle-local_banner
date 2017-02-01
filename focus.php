@@ -61,6 +61,8 @@ $fileurl = moodle_url::make_pluginfile_url(
 $mform = new \local_banner\form\process();
 
 if ($mform->is_cancelled()) {
+    $url = new moodle_url('/course/view.php', array('id' => $course->id));
+    redirect($url);
 
 } else if ($data = $mform->get_data()) {
     // Upon submission of the focal point, update the top left crop x/y.

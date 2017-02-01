@@ -59,15 +59,13 @@ if ($hassiteconfig) {
         get_string('aspectratio',      'local_banner'),
         get_string('aspectratio_desc', 'local_banner'),
         '3/1',
-        '/^\d+\.?(\d*)?[.:\/]?(\d*)?$/'
+        '/^\d+(\.\d+)?([:\/]+\d+)?$/'
         /*
         '/
-        ^\d+    # Starts with digits,         16
-        \.?     # Optional period,            16.
-        (\d*)?  # Optional more digits        16.18
-        [.:\/]? # Optional either \ : or .    16.18:
-        (\d*)?$ # Optional ending with digits 16.18:10
-        /x'    // PCRE_EXTENDED
+        ^\d+         # Starts with digits,                            16
+        (\.\d+)?     # Optional period followed by more digits        16.18
+        ([:\/]+\d+)? # Optional period OR colon follow by more digits 16.18:10
+        /x'       // PCRE_EXTENDED
         */
     );
 

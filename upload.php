@@ -49,6 +49,8 @@ $PAGE->set_pagelayout('standard');
 $mform = new \local_banner\form\upload();
 
 if ($mform->is_cancelled()) {
+    $url = new moodle_url('/course/view.php', array('id' => $course->id));
+    redirect($url);
 
 } else if ($data = $mform->get_data()) {
     $draftitemid = file_get_submitted_draft_itemid('banners');
