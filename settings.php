@@ -65,7 +65,7 @@ if ($hassiteconfig) {
         ^\d+         # Starts with digits,                            16
         (\.\d+)?     # Optional period followed by more digits        16.18
         ([:\/]+\d+)? # Optional period OR colon follow by more digits 16.18:10
-        /x'       // PCRE_EXTENDED
+        /x'         // PCRE_EXTENDED
         */
     );
 

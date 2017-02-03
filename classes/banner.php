@@ -178,8 +178,15 @@ class banner {
     private function parse_ratio() {
         $config = get_config('local_banner', 'aspectratio');
 
-        if ($exploded = explode(':', $config) || $exploded = explode('/', $config)) {
-            return $exploded[0] / $exploded[1];
+        preg_match('/[:\.]/', $config, $matches);
+
+        if ($matches) {
+            $token = $matches[0];
+            $exploded = explode($token, $config);
+
+            if (count($exploded) == 2) {
+                return $exploded[0] / $exploded[1];
+            }
         }
 
         return $config;
@@ -308,6 +315,7 @@ class banner {
         imagefill($canvas, 0, 0, imagecolorallocatealpha($canvas, 0, 0, 0, 127));
         imagesavealpha($canvas, true);
 
+        // Set deaults
         $dst_x = 0; // x-coordinate of destination point.
         $dst_y = 0; // y-coordinate of destination point.
         $src_x = $this->cropx; // x-coordinate of source point.
@@ -316,6 +324,37 @@ class banner {
         $dst_h = $imageinfo[1]; // Destination height.
         $src_w = $imageinfo[0]; // Source width.
         $src_h = $imageinfo[1]; // Source height.
+
+        // Find the center of the focus box.
+        $focusx = $this->cropx + ($this->width / 2);
+        $focusy = $this->cropy + ($this->height / 2);
+
+        // Set src_x to be the center of the focus box
+        $src_x = $focusx;
+
+        // Check/set the x overflow value for the left of the canvas.
+        if (($focusx - ($canvaswidth /2)) < $imageinfo[0]) {
+            $src_x = 0;
+        }
+
+        // Check/set the x overflow value for the right of the canvas.
+        if (($focusx + ($canvaswidth /2)) > $imageinfo[0]) {
+            $lx = $imageinfo[0] - $focusx;
+            $src_y = ($focusx + $lx) - $canvaswidth;
+        }
+
+        // Set src_y to be the center of the focus box
+        $src_y = $focusy;
+        // Check/set the y overflow value for the top of the canvas.
+        if (($focusy - ($canvasheight /2)) < $imageinfo[1]) {
+            $src_y = 0;
+        }
+
+        // Check/set the y overflow value for the bottom of the canvas.
+        if (($focusy + ($canvasheight /2)) > $imageinfo[1]) {
+            $ly = $imageinfo[1] - $focusy;
+            $src_y = ($focusy + $ly) - $canvasheight;
+        }
 
         // Lets crop!
         imagecopyresampled($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
@@ -351,12 +390,12 @@ class banner {
     public static function render_edit_buttons() {
         global $PAGE, $COURSE, $USER;
 
-        $banner = self::load_from_courseid($COURSE->id);
-
         // Only allow modification of banners in the course context.
         if ($PAGE->context->contextlevel != CONTEXT_COURSE) {
-            return;
+            return '';
         }
+
+        $banner = self::load_from_courseid($COURSE->id);
 
         if (isset($USER->editing) && $USER->editing) {
             $r = $PAGE->get_renderer('local_banner');

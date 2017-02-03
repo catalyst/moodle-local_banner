@@ -63,7 +63,7 @@ class local_banner_renderer extends plugin_renderer_base {
         $deleteurl = new moodle_url('/local/banner/delete.php', $params);
         $focusurl = new moodle_url('/local/banner/focus.php', $params);
 
-        $html  = html_writer::start_div();
+        $html  = html_writer::start_div('local_banner_buttons');
 
         if (!empty($banner)) {
             $html .= html_writer::link($focusurl, 'Change focus point');
