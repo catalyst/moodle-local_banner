@@ -329,29 +329,24 @@ class banner {
         $focusx = $this->cropx + ($this->width / 2);
         $focusy = $this->cropy + ($this->height / 2);
 
-        // Set src_x to be the center of the focus box
-        $src_x = $focusx;
-
         // Check/set the x overflow value for the left of the canvas.
-        if (($focusx - ($canvaswidth /2)) < $imageinfo[0]) {
+        if (($focusx - ($canvaswidth / 2)) <= 0) {
             $src_x = 0;
         }
 
         // Check/set the x overflow value for the right of the canvas.
-        if (($focusx + ($canvaswidth /2)) > $imageinfo[0]) {
+        if (($focusx + ($canvaswidth / 2)) > $imageinfo[0]) {
             $lx = $imageinfo[0] - $focusx;
-            $src_y = ($focusx + $lx) - $canvaswidth;
+            $src_x = ($focusx + $lx) - $canvaswidth;
         }
 
-        // Set src_y to be the center of the focus box
-        $src_y = $focusy;
         // Check/set the y overflow value for the top of the canvas.
-        if (($focusy - ($canvasheight /2)) < $imageinfo[1]) {
+        if (($focusy - ($canvasheight /2)) <= 0) {
             $src_y = 0;
         }
 
         // Check/set the y overflow value for the bottom of the canvas.
-        if (($focusy + ($canvasheight /2)) > $imageinfo[1]) {
+        if (($focusy + ($canvasheight / 2)) > $imageinfo[1]) {
             $ly = $imageinfo[1] - $focusy;
             $src_y = ($focusy + $ly) - $canvasheight;
         }
