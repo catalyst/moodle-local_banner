@@ -1,4 +1,4 @@
-define(['local_banner/cropper'], function (module) {
+define(["local_banner/cropper"], function (cropper) {
     return {
         cropper: function(params) {
             var image = document.getElementById('bannerimage');
