@@ -61,6 +61,7 @@ class banner {
     private $fs = null;
 
     public function __construct($data = null) {
+        // We still want to be able to call the banner filestorage if there was no $data.
         $this->fs = get_file_storage();
 
         if (is_null($data)) {
@@ -148,13 +149,6 @@ class banner {
 
         $file = $fs->get_file($context->id, 'local_banner', 'placeholder', 0, $pathinfo['dirname'], $pathinfo['basename']);
 
-        // Set default x/y coordinates.
-        $imageinfo = @getimagesizefromstring($file->get_content());
-        $canvaswidth = get_config('local_banner', 'width');
-        $canvasheight = get_config('local_banner', 'height');
-        $cropx = ($imageinfo[0] / 2) - ($canvaswidth / 2);
-        $cropy = ($imageinfo[1] / 2) - ($canvasheight / 2);
-
         // No placeholder has been found.
         if (empty($file)) {
             return false;
@@ -164,12 +158,6 @@ class banner {
         $data = array(
             'context' => self::BANNER_PLACEHOLDER,
             'course' =>  self::BANNER_PLACEHOLDER,
-            /*
-            'file' => $file->get_id(),
-            'filename' =>  $pathinfo['basename'],
-            'cropx' => $cropx,
-            'cropy' => $cropy,
-            */
         );
 
         return new banner($data);
@@ -240,13 +228,14 @@ class banner {
             // No file has been saved for this course, return the default banner.
             if (empty($banner->file)) {
                 $path = get_config('local_banner', 'defaultbanner');
-                $file = $banner->fs->get_file(1, 'local_banner', 'placeholder', 0, '/', $path);
+                $contextid = 1;
+                $itemid = 0;
+                $file = $banner->fs->get_file($contextid, 'local_banner', 'placeholder', $itemid, '/', $path);
 
             } else {
                 // This course has a banner fileid assigned to it. Lets create the banner / crop it again.
                 $file = $banner->create_file($itemid);
             }
-
         }
 
         return $file;

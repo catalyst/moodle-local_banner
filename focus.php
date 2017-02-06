@@ -42,8 +42,6 @@ $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
 
-$PAGE->requires->css('/local/banner/css/cropper.css');
-
 $fs = get_file_storage();
 
 // Obtain the original uploaded file.
@@ -76,9 +74,10 @@ if ($mform->is_cancelled()) {
 
 // These parameters match the object used with cropper.js functions getData/setData.
 $params = array(
-    array('banner' => $banner, 'config' => '1'),
+    array('banner' => $banner),
 );
 
+$PAGE->requires->css('/local/banner/css/cropper.css');
 $PAGE->requires->js_call_amd('local_banner/crop', 'cropper', $params);
 
 echo $OUTPUT->header();
