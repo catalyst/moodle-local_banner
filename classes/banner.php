@@ -389,6 +389,13 @@ class banner {
     }
 
     public static function render_banner() {
+        $path = get_config('local_banner', 'defaultbanner');
+
+        // No default has been set. Do not render the css.
+        if (empty($path)) {
+            return self::render_edit_buttons();
+        }
+
         return self::render_style() . self::render_edit_buttons();
     }
 }
