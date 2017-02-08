@@ -314,40 +314,47 @@ class banner {
         $src_w = $imageinfo[0]; // Source width.
         $src_h = $imageinfo[1]; // Source height.
 
-        // The source width and high could possibly be smaller than the canvas. Adjust!
-        if ($src_w < $canvaswidth) {
-            $canvaswidth = $src_w;
-        }
-
-        if ($src_h < $canvasheight) {
-            $canvasheight = $src_h;
-        }
-
-        // Find the center of the focus box.
-        $focusx = $this->cropx + ($this->width / 2);
-        $focusy = $this->cropy + ($this->height / 2);
-
-        // Check/set the x overflow value for the left of the canvas.
-        if (($focusx - ($canvaswidth / 2)) <= 0) {
-            $src_x = 0;
-        }
-
-        // Check/set the x overflow value for the right of the canvas.
-        if (($focusx + ($canvaswidth / 2)) > $imageinfo[0]) {
-            $lx = $imageinfo[0] - $focusx;
-            $src_x = ($focusx + $lx) - $canvaswidth;
-        }
-
-        // Check/set the y overflow value for the top of the canvas.
-        if (($focusy - ($canvasheight /2)) <= 0) {
-            $src_y = 0;
-        }
-
-        // Check/set the y overflow value for the bottom of the canvas.
-        if (($focusy + ($canvasheight / 2)) > $imageinfo[1]) {
-            $ly = $imageinfo[1] - $focusy;
-            $src_y = ($focusy + $ly) - $canvasheight;
-        }
+//        list($ratio_w, $ratio_h) = $this->parse_ratio();
+//        $source_ratio = $src_w / $src_h;
+//        $target_ratio = $ratio_w / $ratio_h;
+//
+//        // The source width and high could possibly be smaller than the canvas. Adjust!
+//        if ($src_w <= $canvaswidth && $src_h <= $canvasheight) {
+//            $dst_w = $src_w;
+//            $dst_h = $src_h;
+//        } elseif ($target_ratio > $source_ratio) {
+//            $dst_w = (int)($src_w * $source_ratio);
+//            $dst_h = $src_h;
+//        } else {
+//            $dst_w = $src_w;
+//            $dst_h = $src_h;
+//        }
+//
+//        // Find the center of the focus box.
+//        $focusx = $this->cropx + ($this->width / 2);
+//        $focusy = $this->cropy + ($this->height / 2);
+//
+//        // Check/set the x overflow value for the left of the canvas.
+//        if (($focusx - ($dst_w / 2)) <= 0) {
+//            $src_x = 0;
+//        }
+//
+//        // Check/set the x overflow value for the right of the canvas.
+//        if (($focusx + ($dst_w / 2)) > $canvaswidth) {
+//            $lx = $canvaswidth - $focusx;
+//            $src_x = ($focusx + $lx) - $canvaswidth;
+//        }
+//
+//        // Check/set the y overflow value for the top of the canvas.
+//        if (($focusy - ($dst_h /2)) <= 0) {
+//            $src_y = 0;
+//        }
+//
+//        // Check/set the y overflow value for the bottom of the canvas.
+//        if (($focusy + ($dst_h / 2)) > $canvasheight) {
+//            $ly = $canvasheight - $focusy;
+//            $src_y = ($focusy + $ly) - $canvasheight;
+//        }
 
         // Lets crop!
         imagecopyresampled($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
