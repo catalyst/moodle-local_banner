@@ -166,18 +166,27 @@ class banner {
     private function parse_ratio() {
         $config = get_config('local_banner', 'aspectratio');
 
-        preg_match('/[:\.]/', $config, $matches);
+        preg_match('/[:]/', $config, $matches);
+
+        $ratio_w = $config; // ratio_w could be a single integer in the config.
+        $ratio_h = 1;       // default
 
         if ($matches) {
             $token = $matches[0];
             $exploded = explode($token, $config);
 
             if (count($exploded) == 2) {
-                return $exploded[0] / $exploded[1];
+                $ratio_w = $exploded[0];
+                $ratio_h = $exploded[1];
             }
         }
 
-        return $config;
+        return array($ratio_w, $ratio_h);
+    }
+
+    public function get_ratio() {
+        list($ratio_w, $ratio_h) = $this->parse_ratio();
+        return $ratio_w / $ratio_h;
     }
 
     public static function generate($courseid, $width, $original) {
