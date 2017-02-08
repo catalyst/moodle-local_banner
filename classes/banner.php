@@ -313,7 +313,7 @@ class banner {
         imagefill($canvas, 0, 0, imagecolorallocatealpha($canvas, 0, 0, 0, 127));
         imagesavealpha($canvas, true);
 
-        // Set deaults
+        // Set defaults.
         $dst_x = 0; // x-coordinate of destination point.
         $dst_y = 0; // y-coordinate of destination point.
         $src_x = $this->cropx; // x-coordinate of source point.
