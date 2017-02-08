@@ -73,8 +73,9 @@ if ($mform->is_cancelled()) {
 }
 
 // These parameters match the object used with cropper.js functions getData/setData.
+$aspectratio = $banner->get_ratio();
 $params = array(
-    array('banner' => $banner),
+    array('banner' => $banner, 'aspectratio' => $aspectratio),
 );
 
 $PAGE->requires->css('/local/banner/css/cropper.css');
