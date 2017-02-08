@@ -360,11 +360,15 @@ class banner {
         imagedestroy($canvas);
     }
 
-    public static function render_style() {
+    public static function render_style($courseid = null) {
         global $PAGE, $COURSE;
 
+        if (empty($courseid)) {
+            $courseid = $COURSE->id;
+        }
+
         $r = $PAGE->get_renderer('local_banner');
-        $html = $r->render_style($COURSE->id);
+        $html = $r->render_style($courseid);
         return $html;
     }
 
@@ -398,11 +402,19 @@ class banner {
     public static function render_banner() {
         global $COURSE;
 
-        $html = '';
-
         $banner = self::load_from_courseid($COURSE->id);
-        if (!empty($banner)) {
-            $html .= self::render_style();
+        if (empty($banner)) {
+            // If the default banner has been set, we will render it.
+            $defaultbanner = get_config('local_banner', 'defaultbanner');
+            if (!empty($defaultbanner)) {
+                $html = self::render_style(banner::BANNER_PLACEHOLDER);
+            } else {
+                $html = '';
+            }
+
+        } else {
+            // Render the banner that was found for this course.
+            $html = self::render_style();
         }
 
         $html .= self::render_edit_buttons($banner);
