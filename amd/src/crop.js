@@ -5,6 +5,7 @@ define(["local_banner/cropper"], function (cropper) {
             var cropper = new Cropper(image, {
                 viewMode: 3,
                 aspectRatio: params.aspectratio,
+                zoomable: false,
 
                 ready: function () {
                     var data = {
