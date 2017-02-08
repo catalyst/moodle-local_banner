@@ -106,7 +106,7 @@ class banner {
         }
 
         // No record exists for $bannerid.
-        return false;
+        return null;
     }
 
     public static function load_from_courseid($courseid) {
@@ -119,7 +119,7 @@ class banner {
         }
 
         // No record exists for $courseid.
-        return false;
+        return null;
     }
 
     public function set_data($data) {
@@ -151,7 +151,7 @@ class banner {
 
         // No placeholder has been found.
         if (empty($file)) {
-            return false;
+            return null;
         }
 
         // Construct basic $data for a simple banner.
@@ -280,18 +280,18 @@ class banner {
         $source = $this->fs->get_file_by_id($this->file);
 
         if (empty($source)) {
-            return false;
+            return null;
         }
 
         $imageinfo = @getimagesizefromstring($source->get_content());
         if (empty($imageinfo)) {
-            return false;
+            return null;
         }
 
         // Create a new image from the file that we can process.
         $original = @imagecreatefromstring($source->get_content());
         if (empty($original)) {
-            return false;
+            return null;
         }
 
         // The canvas we write to has the max width and height specified in the plugin config.
@@ -371,15 +371,13 @@ class banner {
         return $html;
     }
 
-    public static function render_edit_buttons() {
+    public static function render_edit_buttons($banner) {
         global $PAGE, $COURSE, $USER;
 
         // Only allow modification of banners in the course context.
         if ($PAGE->context->contextlevel != CONTEXT_COURSE) {
             return '';
         }
-
-        $banner = self::load_from_courseid($COURSE->id);
 
         if (isset($USER->editing) && $USER->editing) {
             $r = $PAGE->get_renderer('local_banner');
@@ -389,13 +387,17 @@ class banner {
     }
 
     public static function render_banner() {
-        $path = get_config('local_banner', 'defaultbanner');
+        global $COURSE;
 
-        // No default has been set. Do not render the css.
-        if (empty($path)) {
-            return self::render_edit_buttons();
+        $html = '';
+
+        $banner = self::load_from_courseid($COURSE->id);
+        if (!empty($banner)) {
+            $html .= self::render_style();
         }
 
-        return self::render_style() . self::render_edit_buttons();
+        $html .= self::render_edit_buttons($banner);
+
+        return $html;
     }
 }
