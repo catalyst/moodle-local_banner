@@ -1,6 +1,11 @@
+#bannerimage {
+    max-width: 100%;
+}
+
 .local_banner_buttons {
     float: left;
 }
-.local_banner_buttons a {
+
+.local_banner_buttons > a {
     margin-right: 10px;
 }

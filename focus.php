@@ -82,8 +82,8 @@ $PAGE->requires->js_call_amd('local_banner/crop', 'cropper', $params);
 
 echo $OUTPUT->header();
 
-$img = html_writer::img($fileurl, '', array('id' => 'bannerimage'));
-echo html_writer::div($img);
+$img = html_writer::img($fileurl, '', array('id' => 'bannerimage', 'class' => 'local_banner'));
+echo html_writer::div($img, 'container');
 echo html_writer::empty_tag('br');
 
 echo $mform->display();
