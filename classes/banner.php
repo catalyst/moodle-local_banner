@@ -314,6 +314,15 @@ class banner {
         $src_w = $imageinfo[0]; // Source width.
         $src_h = $imageinfo[1]; // Source height.
 
+        // The source width and high could possibly be smaller than the canvas. Adjust!
+        if ($src_w < $canvaswidth) {
+            $canvaswidth = $src_w;
+        }
+
+        if ($src_h < $canvasheight) {
+            $canvasheight = $src_h;
+        }
+
         // Find the center of the focus box.
         $focusx = $this->cropx + ($this->width / 2);
         $focusy = $this->cropy + ($this->height / 2);
