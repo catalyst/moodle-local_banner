@@ -189,7 +189,7 @@ class banner {
         return $ratio_w / $ratio_h;
     }
 
-    public static function generate($courseid, $width, $original) {
+    public static function generate($courseid, $width, $height, $original) {
         // Check to see if a banner exists.
         $banner = self::load_from_courseid($courseid);
 
@@ -213,14 +213,10 @@ class banner {
             return $file;
         }
 
+        $itemid = $width;
+
         if ($original) {
             $itemid = banner::BANNER_DEFAULT;
-        } elseif ($width) {
-            // Allow generation of custom width banners.
-            $itemid = $width;
-        } else {
-            // Obtain the course banner that has the itemid of the admin setting width.
-            $itemid = get_config('local_banner', 'width');
         }
 
         /*
@@ -243,7 +239,7 @@ class banner {
 
             } else {
                 // This course has a banner fileid assigned to it. Lets create the banner / crop it again.
-                $file = $banner->create_file($itemid);
+                $file = $banner->create_file($width, $height);
             }
         }
 
@@ -261,12 +257,12 @@ class banner {
         }
     }
 
-    private function create_file($itemid) {
+    private function create_file($width, $height) {
         $dir = make_request_directory();
         $tmpfile = tempnam($dir, 'banner_');
 
         $handle = fopen($tmpfile, "w");
-        $this->image_crop($tmpfile);
+        $this->image_crop($tmpfile, $width, $height);
         fclose($handle);
 
         $pathinfo = pathinfo($this->filename);
@@ -275,9 +271,9 @@ class banner {
             'contextid' => $this->context,
             'component' => 'local_banner',
             'filearea' => 'banners',
-            'itemid' => $itemid,
+            'itemid' => $width,
             'filepath' => '/',
-            'filename' => $pathinfo['filename'] . '-' . $itemid . '.' . $pathinfo['extension'],
+            'filename' => $pathinfo['filename'] . '-' . $width . '.' . $pathinfo['extension'],
             'mimetype' => get_mimetype_for_sending($pathinfo['basename']),
             'source' => $pathinfo['basename'],
         );
@@ -285,15 +281,10 @@ class banner {
         return $this->fs->create_file_from_pathname($record, $tmpfile);
     }
 
-    private function image_crop($tmpfile) {
+    private function image_crop($tmpfile, $cropwidth, $cropheight) {
         $source = $this->fs->get_file_by_id($this->file);
 
         if (empty($source)) {
-            return null;
-        }
-
-        $imageinfo = @getimagesizefromstring($source->get_content());
-        if (empty($imageinfo)) {
             return null;
         }
 
@@ -303,70 +294,76 @@ class banner {
             return null;
         }
 
-        // The canvas we write to has the max width and height specified in the plugin config.
-        $canvaswidth = get_config('local_banner', 'width');
-        $canvasheight = get_config('local_banner', 'height');
-        $canvas = imagecreatetruecolor($canvaswidth, $canvasheight);
-
-        // Create a transparent canvas.
-        imagealphablending($canvas, false);
-        imagefill($canvas, 0, 0, imagecolorallocatealpha($canvas, 0, 0, 0, 127));
-        imagesavealpha($canvas, true);
+        $imageinfo = @getimagesizefromstring($source->get_content());
+        if (empty($imageinfo)) {
+            return null;
+        }
 
         // Set defaults.
         $dst_x = 0; // x-coordinate of destination point.
         $dst_y = 0; // y-coordinate of destination point.
         $src_x = $this->cropx; // x-coordinate of source point.
         $src_y = $this->cropy; // y-coordinate of source point.
+
+        // Same as the input/output to keep the 1:1 scale.
         $dst_w = $imageinfo[0]; // Destination width.
         $dst_h = $imageinfo[1]; // Destination height.
         $src_w = $imageinfo[0]; // Source width.
         $src_h = $imageinfo[1]; // Source height.
 
-//        list($ratio_w, $ratio_h) = $this->parse_ratio();
-//        $source_ratio = $src_w / $src_h;
-//        $target_ratio = $ratio_w / $ratio_h;
-//
-//        // The source width and high could possibly be smaller than the canvas. Adjust!
-//        if ($src_w <= $canvaswidth && $src_h <= $canvasheight) {
-//            $dst_w = $src_w;
-//            $dst_h = $src_h;
-//        } elseif ($target_ratio > $source_ratio) {
-//            $dst_w = (int)($src_w * $source_ratio);
-//            $dst_h = $src_h;
-//        } else {
-//            $dst_w = $src_w;
-//            $dst_h = $src_h;
-//        }
-//
-//        // Find the center of the focus box.
-//        $focusx = $this->cropx + ($this->width / 2);
-//        $focusy = $this->cropy + ($this->height / 2);
-//
-//        // Check/set the x overflow value for the left of the canvas.
-//        if (($focusx - ($dst_w / 2)) <= 0) {
-//            $src_x = 0;
-//        }
-//
-//        // Check/set the x overflow value for the right of the canvas.
-//        if (($focusx + ($dst_w / 2)) > $canvaswidth) {
-//            $lx = $canvaswidth - $focusx;
-//            $src_x = ($focusx + $lx) - $canvaswidth;
-//        }
-//
-//        // Check/set the y overflow value for the top of the canvas.
-//        if (($focusy - ($dst_h /2)) <= 0) {
-//            $src_y = 0;
-//        }
-//
-//        // Check/set the y overflow value for the bottom of the canvas.
-//        if (($focusy + ($dst_h / 2)) > $canvasheight) {
-//            $ly = $canvasheight - $focusy;
-//            $src_y = ($focusy + $ly) - $canvasheight;
-//        }
+        $canvas = imagecreatetruecolor($cropwidth, $cropheight);
+
+        // Create a transparent canvas.
+        imagealphablending($canvas, false);
+        imagefill($canvas, 0, 0, imagecolorallocatealpha($canvas, 0, 0, 0, 127));
+        imagesavealpha($canvas, true);
+
+        $source_ratio = $src_w / $src_h;
+        $target_ratio = $cropwidth / $cropheight;
+
+        // If the source image is smaller than the canvas output.
+        if ($src_w <= $cropwidth || $src_h <= $cropheight) {
+            if ($target_ratio > $source_ratio) {
+                $dst_w = $cropheight * $target_ratio;
+            } else {
+                $dst_h = $cropwidth / $target_ratio;
+            }
+        }
+
+        // Find the center of the focus box.
+        $focusx = $this->cropx + ($this->width / 2);
+        $focusy = $this->cropy + ($this->height / 2);
+
+        // Set the initial xy coordinates without disregarding any overflow.
+        $src_x = $focusx - ($cropwidth / 2);
+        $src_y = $focusy - ($cropheight / 2);
+
+        // Checking the x overflow, left boundary.
+        if ($focusx - ($cropwidth/2) < 0) {
+            $src_x = 0;
+        }
+
+        // Checking the x overflow, right boundary.
+        if ($focusx + ($cropwidth/2) > $dst_w) {
+            $src_x = $dst_w - $cropwidth;
+        }
+
+        // Checking the y overflow, top boundary.
+        if ($focusy - ($cropheight/2) < 0) {
+            $src_y = 0;
+        }
+
+        // Checking the y overflow, bottom boundary.
+        if ($focusy + ($cropheight/2) > $dst_h) {
+            $src_y = $dst_h - $cropheight;
+        }
 
         // Lets crop!
-        imagecopyresampled($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
+        imagesetinterpolation($canvas, IMG_BICUBIC);
+        imagesetinterpolation($original, IMG_BICUBIC);
+
+        //imagecopy($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h);
+        imagecopyresized($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
 
         // Write the canvas to the temporary file.
         imagepng($canvas, $tmpfile, 9);
