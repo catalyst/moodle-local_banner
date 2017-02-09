@@ -60,6 +60,12 @@ class banner {
 
     private $fs = null;
 
+    private $cropw = null;
+
+    private $croph = null;
+
+    private $itemid = null;
+
     public function __construct($data = null) {
         // We still want to be able to call the banner filestorage if there was no $data.
         $this->fs = get_file_storage();
@@ -199,7 +205,7 @@ class banner {
 
         // No placeholder has been found.
         if (empty($banner)) {
-            return false;
+            return null;
         }
 
         // When not viewing a course, provide the default banner.
@@ -213,10 +219,17 @@ class banner {
             return $file;
         }
 
-        $itemid = $width;
+        // Do not generate a file that is w/h 0.
+        if (empty($width) || empty($height)) {
+            return null;
+        }
+
+        $banner->cropw = $width;
+        $banner->croph = $height;
+        $banner->itemid = $width . $height;
 
         if ($original) {
-            $itemid = banner::BANNER_DEFAULT;
+            $banner->itemid = banner::BANNER_DEFAULT;
         }
 
         /*
@@ -224,7 +237,7 @@ class banner {
          * The false argument prevents directory lookup.
          * When specifying $itemid this _should_ return an array of one element.
          */
-        $filearray = $banner->fs->get_area_files($banner->context, 'local_banner', 'banners', $itemid, 'itemid', false);
+        $filearray = $banner->fs->get_area_files($banner->context, 'local_banner', 'banners', $banner->itemid, 'itemid', false);
         $file = array_shift($filearray);
 
         // File does not exist. Create it.
@@ -239,7 +252,7 @@ class banner {
 
             } else {
                 // This course has a banner fileid assigned to it. Lets create the banner / crop it again.
-                $file = $banner->create_file($width, $height);
+                $file = $banner->create_file();
             }
         }
 
@@ -257,23 +270,24 @@ class banner {
         }
     }
 
-    private function create_file($width, $height) {
+    private function create_file() {
         $dir = make_request_directory();
         $tmpfile = tempnam($dir, 'banner_');
 
         $handle = fopen($tmpfile, "w");
-        $this->image_crop($tmpfile, $width, $height);
+        $this->image_crop($tmpfile);
         fclose($handle);
 
         $pathinfo = pathinfo($this->filename);
+        $newfilename = $pathinfo['filename'] . '-' . $this->cropw . 'x' . $this->croph . '.' . $pathinfo['extension'];
 
         $record = array(
             'contextid' => $this->context,
             'component' => 'local_banner',
             'filearea' => 'banners',
-            'itemid' => $width,
+            'itemid' => $this->itemid,
             'filepath' => '/',
-            'filename' => $pathinfo['filename'] . '-' . $width . '.' . $pathinfo['extension'],
+            'filename' => $newfilename,
             'mimetype' => get_mimetype_for_sending($pathinfo['basename']),
             'source' => $pathinfo['basename'],
         );
@@ -281,7 +295,7 @@ class banner {
         return $this->fs->create_file_from_pathname($record, $tmpfile);
     }
 
-    private function image_crop($tmpfile, $cropwidth, $cropheight) {
+    private function image_crop($tmpfile) {
         $source = $this->fs->get_file_by_id($this->file);
 
         if (empty($source)) {
@@ -310,6 +324,10 @@ class banner {
         $dst_h = $imageinfo[1]; // Destination height.
         $src_w = $imageinfo[0]; // Source width.
         $src_h = $imageinfo[1]; // Source height.
+
+        // URL parameters passed to the generation.
+        $cropwidth = $this->cropw;
+        $cropheight = $this->croph;
 
         $canvas = imagecreatetruecolor($cropwidth, $cropheight);
 

@@ -72,10 +72,16 @@ if ($mform->is_cancelled()) {
             continue;
         }
 
+        $imageinfo = @getimagesizefromstring($file->get_content());
+
         $banner->course = $course->id;
         $banner->context = $coursecontext->id;
         $banner->file = $file->get_id();
         $banner->filename = $file->get_filename();
+        $banner->cropx = ($imageinfo[0] / 2) - 25;
+        $banner->cropy = ($imageinfo[1] / 2) - 25;
+        $banner->height = 50;
+        $banner->width = 50;
         $banner->save();
         break;
     }
