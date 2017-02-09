@@ -42,7 +42,11 @@ class local_banner_renderer extends plugin_renderer_base {
      * @return string $out The html output.
      */
     public function render_style($courseid) {
-        $params = array('course' => $courseid);
+        $params = array(
+            'course' => $courseid,
+            'width' => 1000,
+            'height' => 120,
+        );
         $src = new moodle_url('/local/banner/', $params);
 
         $class = "<style>

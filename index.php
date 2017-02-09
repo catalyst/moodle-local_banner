@@ -28,14 +28,15 @@ use local_banner\banner;
 require_once(__DIR__ . '/../../config.php');
 
 $id = optional_param('course', null, PARAM_INT);
-$width = optional_param('w', 0, PARAM_INT);
+$width = optional_param('width', 0, PARAM_INT);
+$height = optional_param('height', 0, PARAM_INT);
 $original = optional_param('original', 0, PARAM_INT);
 
 if (empty($id)) {
     die();
 }
 
-$banner = banner::generate($id, $width, $original);
+$banner = banner::generate($id, $width, $height, $original);
 
 if ($banner) {
     send_stored_file($banner, 0, 0, false);
