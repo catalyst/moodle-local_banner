@@ -3,8 +3,7 @@ define(["local_banner/cropper"], function (cropper) {
         cropper: function(params) {
             var image = document.getElementById('bannerimage');
             var cropper = new Cropper(image, {
-                viewMode: 3,
-                aspectRatio: params.aspectratio,
+                viewMode: 1,
                 zoomable: false,
 
                 ready: function () {
@@ -19,7 +18,7 @@ define(["local_banner/cropper"], function (cropper) {
                     };
 
                     this.cropper.setData(data);
-                    this.cropper.zoom(-0.5);    // Zoom out, not used with viewMode 3.
+                    //this.cropper.zoom(-0.5);    // Zoom out, not used with viewMode 3.
                 },
 
                 // Updating the values each time the crop changes.
