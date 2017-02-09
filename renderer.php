@@ -57,22 +57,32 @@ class local_banner_renderer extends plugin_renderer_base {
     }
 
     public function render_edit_buttons($courseid, $banner, $sesskey) {
+        global $OUTPUT;
+
         $params = array('course' => $courseid, 'sesskey' => $sesskey);
 
         $uploadurl = new moodle_url('/local/banner/upload.php', $params);
         $deleteurl = new moodle_url('/local/banner/delete.php', $params);
         $focusurl = new moodle_url('/local/banner/focus.php', $params);
 
+        $uploadstring = get_string('replacebanner', 'local_banner');
+        $deletestring = get_string('removebanner', 'local_banner');
+        $focusstring = get_string('changefocus', 'local_banner');
+
+        $uploadimg = $OUTPUT->pix_icon('t/up', $uploadstring, 'core', array('class' => 'iconsmall'));
+        $deleteimg = $OUTPUT->pix_icon('t/delete', $deletestring, 'core', array('class' => 'iconsmall'));
+        $focusimg = $OUTPUT->pix_icon('t/preview', $focusstring, 'core', array('class' => 'iconsmall'));
+
         $html  = html_writer::start_div('local_banner_buttons');
 
         if (!empty($banner)) {
-            $html .= html_writer::link($focusurl, 'Change focus point');
+            $html .= html_writer::link($focusurl, $focusimg . $focusstring);
         }
 
-        $html .= html_writer::link($uploadurl, 'Replace Banner');
+        $html .= html_writer::link($uploadurl, $uploadimg . $uploadstring);
 
         if (!empty($banner)) {
-            $html .= html_writer::link($deleteurl, 'Remove Banner');
+            $html .= html_writer::link($deleteurl, $deleteimg . $deletestring);
         }
         $html .= html_writer::end_div();
 

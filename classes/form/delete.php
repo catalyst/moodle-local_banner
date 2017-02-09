@@ -48,7 +48,7 @@ class delete extends \moodleform {
         $mform->addElement('hidden', 'course');
         $mform->setType('course', PARAM_INT);
 
-        $this->add_action_buttons(true, get_string('deletefile', 'local_banner'));
+        $this->add_action_buttons(true, get_string('removebanner', 'local_banner'));
     }
 
     /**

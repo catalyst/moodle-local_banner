@@ -37,10 +37,12 @@ $banner = banner::load_from_courseid($course->id);
 require_login($course);
 require_sesskey();
 
-$url = new moodle_url('/local/banner/process.php', array('course' => $course->id));
+$url = new moodle_url('/local/banner/focus.php', array('course' => $course->id));
 $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
+$PAGE->set_title(get_string('modifybanner', 'local_banner'));
+$PAGE->set_heading(get_string('modifybanner', 'local_banner'));
 
 $fs = get_file_storage();
 
@@ -73,9 +75,8 @@ if ($mform->is_cancelled()) {
 }
 
 // These parameters match the object used with cropper.js functions getData/setData.
-$aspectratio = $banner->get_ratio();
 $params = array(
-    array('banner' => $banner, 'aspectratio' => $aspectratio),
+    array('banner' => $banner),
 );
 
 $PAGE->requires->css('/local/banner/css/cropper.css');

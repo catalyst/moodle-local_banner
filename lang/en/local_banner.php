@@ -25,17 +25,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['deletefile'] = 'Remove Banner';
-$string['deletefilenotification'] = 'You are about to remove the banner for this course.';
+$string['changefocus'] = 'Change focus point';
+$string['modifybanner'] = 'Modify Banner';
 $string['pluginname'] = 'Course Banner';
-$string['uploadfile'] = 'Banner Upload';
+$string['removebanner'] = 'Remove Banner';
+$string['removebannernotification'] = 'You are about to remove the banner for this course.';
+$string['replacebanner'] = 'Replace Banner';
+$string['uploadbanner'] = 'Upload Banner';
 $string['setfocus'] = 'Set Focus';
-
-$string['width'] = '';
-$string['width_desc'] = '';
-$string['height'] = '';
-$string['height_desc'] = '';
-$string['aspectratio'] = '';
-$string['aspectratio_desc'] = '';
-$string['defaultbanner'] = '';
-$string['defaultbanner_desc'] = '';
+$string['defaultbanner'] = 'Default placeholder banner';
+$string['defaultbanner_desc'] = 'This will be the banner that will be displayed across the site.';

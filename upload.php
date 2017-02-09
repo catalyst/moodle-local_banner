@@ -45,6 +45,8 @@ $url = new moodle_url('/local/banner/upload.php', array('course' => $course->id)
 $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
+$PAGE->set_title(get_string('uploadbanner', 'local_banner'));
+$PAGE->set_heading(get_string('uploadbanner', 'local_banner'));
 
 $mform = new \local_banner\form\upload();
 
