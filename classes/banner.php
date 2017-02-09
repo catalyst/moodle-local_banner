@@ -220,7 +220,7 @@ class banner {
         }
 
         // Do not generate a file that is w/h 0.
-        if (empty($width) || empty($height)) {
+        if (!$original && (empty($width) || empty($height))) {
             return null;
         }
 
