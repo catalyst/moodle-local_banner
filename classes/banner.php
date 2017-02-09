@@ -273,10 +273,7 @@ class banner {
     private function create_file() {
         $dir = make_request_directory();
         $tmpfile = tempnam($dir, 'banner_');
-
-        $handle = fopen($tmpfile, "w");
         $this->image_crop($tmpfile);
-        fclose($handle);
 
         $pathinfo = pathinfo($this->filename);
         $newfilename = $pathinfo['filename'] . '-' . $this->cropw . 'x' . $this->croph . '.' . $pathinfo['extension'];
@@ -336,25 +333,24 @@ class banner {
         imagefill($canvas, 0, 0, imagecolorallocatealpha($canvas, 0, 0, 0, 127));
         imagesavealpha($canvas, true);
 
-        $source_ratio = $src_w / $src_h;
-        $target_ratio = $cropwidth / $cropheight;
+        $scale = 1;
 
         // If the source image is smaller than the canvas output.
-        if ($src_w <= $cropwidth || $src_h <= $cropheight) {
-            if ($target_ratio > $source_ratio) {
-                $dst_w = $cropheight * $target_ratio;
-            } else {
-                $dst_h = $cropwidth / $target_ratio;
-            }
+        if ($src_w <= $cropwidth) {
+            $scale = ($cropwidth / $src_w);
+            $dst_w = $dst_w * $scale;
+            $dst_h = $dst_h * $scale;
         }
 
         // Find the center of the focus box.
-        $focusx = $this->cropx + ($this->width / 2);
-        $focusy = $this->cropy + ($this->height / 2);
+        $focusx = ($this->cropx * $scale) + (($this->width * $scale) / 2);
+        $focusy = ($this->cropy * $scale) + (($this->height * $scale) / 2);
 
         // Set the initial xy coordinates without disregarding any overflow.
-        $src_x = $focusx - ($cropwidth / 2);
-        $src_y = $focusy - ($cropheight / 2);
+        if ($scale == 1) {
+            $src_x = $focusx - ($cropwidth / 2);
+            $src_y = $focusy - ($cropheight / 2);
+        }
 
         // Checking the x overflow, left boundary.
         if ($focusx - ($cropwidth/2) < 0) {
@@ -380,8 +376,7 @@ class banner {
         imagesetinterpolation($canvas, IMG_BICUBIC);
         imagesetinterpolation($original, IMG_BICUBIC);
 
-        //imagecopy($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h);
-        imagecopyresized($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
+        imagecopyresampled($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
 
         // Write the canvas to the temporary file.
         imagepng($canvas, $tmpfile, 9);
