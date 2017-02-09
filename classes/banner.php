@@ -398,8 +398,11 @@ class banner {
             $courseid = $COURSE->id;
         }
 
+        $width = get_config('local_banner', 'width');
+        $height = get_config('local_banner', 'height');
+
         $r = $PAGE->get_renderer('local_banner');
-        $html = $r->render_style($courseid);
+        $html = $r->render_style($courseid, $width, $height);
         return $html;
     }
 

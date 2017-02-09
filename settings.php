@@ -38,6 +38,22 @@ if ($hassiteconfig) {
         ''
     );
 
+    $width = new admin_setting_configtext(
+        'local_banner/width',
+        get_string('width',      'local_banner'),
+        get_string('width_desc', 'local_banner'),
+        1000,
+        PARAM_INT
+    );
+
+    $height = new admin_setting_configtext(
+        'local_banner/height',
+        get_string('height',      'local_banner'),
+        get_string('height_desc', 'local_banner'),
+        120,
+        PARAM_INT
+    );
+
     $defaultbanner = new admin_setting_configstoredfile(
         'local_banner/defaultbanner',
         get_string('defaultbanner',      'local_banner'),
@@ -45,6 +61,11 @@ if ($hassiteconfig) {
         'placeholder'
     );
 
+    $width->set_updatedcallback('local_banner_invalidate_callback');
+    $height->set_updatedcallback('local_banner_invalidate_callback');
+
     $settings->add($heading);
+    $settings->add($width);
+    $settings->add($height);
     $settings->add($defaultbanner);
 }
