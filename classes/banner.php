@@ -151,14 +151,14 @@ class banner {
         $fs = get_file_storage();
         $context = context_system::instance();
         $defaultfilename = get_config('local_banner', 'defaultbanner');
-        $pathinfo = pathinfo($defaultfilename);
-
-        $file = $fs->get_file($context->id, 'local_banner', 'placeholder', 0, $pathinfo['dirname'], $pathinfo['basename']);
 
         // No placeholder has been found.
-        if (empty($file)) {
+        if (empty($defaultfilename)) {
             return null;
         }
+
+        $pathinfo = pathinfo($defaultfilename);
+        $file = $fs->get_file($context->id, 'local_banner', 'placeholder', 0, $pathinfo['dirname'], $pathinfo['basename']);
 
         // Construct basic $data for a simple banner.
         $data = array(
