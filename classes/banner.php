@@ -316,61 +316,95 @@ class banner {
         $src_x = $this->cropx; // x-coordinate of source point.
         $src_y = $this->cropy; // y-coordinate of source point.
 
-        // Same as the input/output to keep the 1:1 scale.
-        $dst_w = $imageinfo[0]; // Destination width.
-        $dst_h = $imageinfo[1]; // Destination height.
+        // URL parameters passed to the generation.
+        $dst_w = $this->cropw; // Destination width.
+        $dst_h = $this->croph; // Destination height.
+
+        // Input image size.
         $src_w = $imageinfo[0]; // Source width.
         $src_h = $imageinfo[1]; // Source height.
 
-        // URL parameters passed to the generation.
-        $cropwidth = $this->cropw;
-        $cropheight = $this->croph;
+        // 1600 / 500 = 3.2
+        $file_input_ratio = $src_w / $src_h;
 
-        $canvas = imagecreatetruecolor($cropwidth, $cropheight);
+        // 1000 / 120 = 8.3333
+        $crop_output_ratio = $dst_w / $dst_h;
+
+        // 1600 / 1000 = 1.6
+        $scale_w = $src_w / $dst_w;
+
+        // 500 / 120 = 4.1667
+        $scale_h = $src_h / $dst_h;
+
+        // Scale multiplications.
+        // Resulting width  1000 * 1.6 = 1600
+        // Resulting height 120  * 1.6 = 192
+
+        if ($file_input_ratio < $crop_output_ratio) {
+            // Taking a horizontal slice.
+
+            // Take the maximum width of the image.
+            $src_w = $imageinfo[0];
+
+            // The maximum height multiplied by the scale;
+            $src_h = $dst_h *  $scale_w;
+
+            // Starting at the left side of the image.
+            $src_x = 0;
+
+            // Find the center of the focus box.
+            $focus_y = $src_y + ($this->height / 2);
+
+            // Subtract half the height of the result.
+            $src_y = $focus_y - ($src_h / 2);
+
+            // Fix upper out of bounds.
+            if ($src_y < 0) {
+                $src_y = 0;
+            }
+
+            // Fix lower out of bounds.
+            if ($src_y + $src_h > $imageinfo[1]) {
+                $src_y = $imageinfo[1] - $src_h;
+            }
+
+        } else {
+            // Taking a vertical slice.
+
+            // Take the maximum height of the image;
+            $src_h = $imageinfo[1];
+
+            // The maximum width multiplied by the scale;
+            $src_w = $dst_w * $scale_h;
+
+            // Starting at the top of the image.
+            $src_y = 0;
+
+            // Find the center of the focus box.
+            $focus_x = $src_x + ($this->width / 2);
+
+            // Subtract half the width of the result.
+            $src_x = $focus_x - ($src_w / 2);
+
+            // Fix left out of bounds.
+            if ($src_x < 0) {
+                $src_x = 0;
+            }
+
+            // Fix right out of bounds.
+            if ($src_x + $src_w > $imageinfo[0]) {
+                $src_x = $imageinfo[0] - $src_w;
+            }
+
+        }
+
+        // The resulting canvas that we will end up with is the destination height and width.
+        $canvas = imagecreatetruecolor($dst_w, $dst_h);
 
         // Create a transparent canvas.
         imagealphablending($canvas, false);
         imagefill($canvas, 0, 0, imagecolorallocatealpha($canvas, 0, 0, 0, 127));
         imagesavealpha($canvas, true);
-
-        $scale = 1;
-
-        // If the source image is smaller than the canvas output.
-        if ($src_w <= $cropwidth) {
-            $scale = ($cropwidth / $src_w);
-            $dst_w = $dst_w * $scale;
-            $dst_h = $dst_h * $scale;
-        }
-
-        // Find the center of the focus box.
-        $focusx = ($this->cropx * $scale) + (($this->width * $scale) / 2);
-        $focusy = ($this->cropy * $scale) + (($this->height * $scale) / 2);
-
-        // Set the initial xy coordinates without disregarding any overflow.
-        if ($scale == 1) {
-            $src_x = $focusx - ($cropwidth / 2);
-            $src_y = $focusy - ($cropheight / 2);
-        }
-
-        // Checking the x overflow, left boundary.
-        if ($focusx - ($cropwidth/2) < 0) {
-            $src_x = 0;
-        }
-
-        // Checking the x overflow, right boundary.
-        if ($focusx + ($cropwidth/2) > $dst_w) {
-            $src_x = $dst_w - $cropwidth;
-        }
-
-        // Checking the y overflow, top boundary.
-        if ($focusy - ($cropheight/2) < 0) {
-            $src_y = 0;
-        }
-
-        // Checking the y overflow, bottom boundary.
-        if ($focusy + ($cropheight/2) > $dst_h) {
-            $src_y = $dst_h - $cropheight;
-        }
 
         // Lets crop!
         imagesetinterpolation($canvas, IMG_BICUBIC);
