@@ -44,10 +44,18 @@ $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('modifybanner', 'local_banner'));
 $PAGE->set_heading(get_string('modifybanner', 'local_banner'));
 
+$courseurl = new moodle_url('/course/view.php', array('id' => $course->id));
+
 $fs = get_file_storage();
 
 // Obtain the original uploaded file.
 $file = $fs->get_file_by_id($banner->file);
+
+// No file in the filepicker field. Delete the banner and redirect.
+if (empty($file)) {
+    $banner->delete();
+    redirect($courseurl);
+}
 
 $fileurl = moodle_url::make_pluginfile_url(
     $file->get_contextid(),
@@ -61,8 +69,7 @@ $fileurl = moodle_url::make_pluginfile_url(
 $mform = new \local_banner\form\process();
 
 if ($mform->is_cancelled()) {
-    $url = new moodle_url('/course/view.php', array('id' => $course->id));
-    redirect($url);
+    redirect($courseurl);
 
 } else if ($data = $mform->get_data()) {
     // Upon submission of the focal point, update the top left crop x/y.

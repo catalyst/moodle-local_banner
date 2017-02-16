@@ -59,7 +59,7 @@ if ($mform->is_cancelled()) {
     file_save_draft_area_files($draftitemid, $coursecontext->id, 'local_banner', 'banners', banner::BANNER_DEFAULT);
 
     $fs = get_file_storage();
-    $files = $fs->get_area_files($coursecontext->id, 'local_banner', 'banners', banner::BANNER_DEFAULT);
+    $files = $fs->get_area_files($coursecontext->id, 'local_banner', 'banners', banner::BANNER_DEFAULT, false);
 
     $banner = banner::load_from_courseid($course->id);
     if ($banner === null) {

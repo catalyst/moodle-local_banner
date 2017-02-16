@@ -395,7 +395,6 @@ class banner {
             if ($src_x + $src_w > $imageinfo[0]) {
                 $src_x = $imageinfo[0] - $src_w;
             }
-
         }
 
         // The resulting canvas that we will end up with is the destination height and width.
