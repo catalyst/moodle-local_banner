@@ -41,5 +41,6 @@ $string['returntocourse'] = 'Cancel / Return to {$a}';
 $string['setfocus'] = 'Set Focus Point';
 $string['uploadbanner'] = 'Upload Banner';
 $string['uploadbannercourse'] = '{$a}: Upload Banner';
+$string['uploadbannerrequired'] = 'Please provide a file.';
 $string['width'] = 'Cropped width';
 $string['width_desc'] = 'The maximum width of the cropped result.';
