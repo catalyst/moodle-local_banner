@@ -53,7 +53,12 @@ $file = $fs->get_file_by_id($banner->file);
 
 // No file in the filepicker field. Delete the banner and redirect.
 if (empty($file)) {
-    $banner->delete();
+
+    // Only delete if the banner exists. We may be working on the placeholder.
+    if (!empty($banner)) {
+        $banner->delete();
+    }
+
     redirect($courseurl);
 }
 
