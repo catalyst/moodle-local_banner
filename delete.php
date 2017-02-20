@@ -45,8 +45,8 @@ $url = new moodle_url('/local/banner/delete.php', array('course' => $course->id)
 $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('removebanner', 'local_banner'));
-$PAGE->set_heading(get_string('removebanner', 'local_banner'));
+$PAGE->set_title(get_string('removebannercourse', 'local_banner', $course->fullname));
+$PAGE->set_heading(get_string('removebannercourse', 'local_banner', $course->fullname));
 
 $mform = new \local_banner\form\delete();
 

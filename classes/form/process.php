@@ -65,7 +65,11 @@ class process extends \moodleform {
         $mform->setType('width', PARAM_INT);
         $mform->setType('rotate', PARAM_INT);
 
-        $this->add_action_buttons(true, get_string('setfocus', 'local_banner'));
+        $buttonarray=array();
+        $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('setfocus', 'local_banner'));
+        $buttonarray[] = &$mform->createElement('cancel', 'cancelbutton', get_string('returntocancel', 'local_banner'));
+        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+        $mform->closeHeaderBefore('buttonar');
     }
 
     /**

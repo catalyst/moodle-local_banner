@@ -48,7 +48,11 @@ class delete extends \moodleform {
         $mform->addElement('hidden', 'course');
         $mform->setType('course', PARAM_INT);
 
-        $this->add_action_buttons(true, get_string('removebanner', 'local_banner'));
+        $buttonarray=array();
+        $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('removebanner', 'local_banner'));
+        $buttonarray[] = &$mform->createElement('cancel', 'cancelbutton', get_string('returntocancel', 'local_banner'));
+        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+        $mform->closeHeaderBefore('buttonar');
     }
 
     /**

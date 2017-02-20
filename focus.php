@@ -41,8 +41,8 @@ $url = new moodle_url('/local/banner/focus.php', array('course' => $course->id))
 $PAGE->set_url($url);
 $PAGE->set_context($coursecontext);
 $PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('modifybanner', 'local_banner'));
-$PAGE->set_heading(get_string('modifybanner', 'local_banner'));
+$PAGE->set_title(get_string('modifybanner', 'local_banner', $course->fullname));
+$PAGE->set_heading(get_string('modifybanner', 'local_banner', $course->fullname));
 
 $courseurl = new moodle_url('/course/view.php', array('id' => $course->id));
 

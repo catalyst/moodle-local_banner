@@ -52,7 +52,11 @@ class upload extends \moodleform {
             'subdirs' => 0, 'maxfiles' => 1, 'accepted_types' => array('image')
         ));
 
-        $this->add_action_buttons(true, get_string('uploadbanner', 'local_banner'));
+        $buttonarray=array();
+        $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('uploadbanner', 'local_banner'));
+        $buttonarray[] = &$mform->createElement('cancel', 'cancelbutton', get_string('returntocancel', 'local_banner'));
+        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+        $mform->closeHeaderBefore('buttonar');
     }
 
     /**
