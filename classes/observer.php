@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the version of local_banner
+ * Banner observer.
  *
  * @package    local_banner
  * @author     Nicholas Hoobin <nicholashoobin@catalyst-au.net>
@@ -23,8 +23,26 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+class local_banner_observer {
+    /**
+     * Triggered via course_deleted event.
+     *
+     * @param \core\event\course_deleted $event
+     * @return bool true on success
+     */
+    public static function course_deleted(\core\event\course_deleted $event) {
+        global $DB;
 
-$plugin->version   = 2017022200;     // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires  = 2014050800;        // Requires this Moodle version.
-$plugin->component = 'local_banner'; // To check on upgrade, that module sits in correct place.
+        $params = array(
+            'course' => $event->courseid,
+        );
+
+        // Files are removed via $contextid->delete_content().
+
+        $banner = $DB->get_records('local_banner', $params);
+        if (!empty($banner)) {
+            $DB->delete_records('local_banner', $params);
+            return true;
+        }
+    }
+}

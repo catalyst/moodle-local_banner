@@ -1,0 +1,43 @@
+language: php
+
+notifications:
+  email:
+    recipients:
+    - nicholashoobin@catalyst-au.net
+
+sudo: true
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+php:
+ - 5.5
+ - 7.0
+
+env:
+  - DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE
+
+before_install:
+  - phpenv config-rm xdebug.ini
+  - cd ../..
+  - composer selfupdate
+  - composer create-project -n --no-dev moodlerooms/moodle-plugin-ci ci ^1
+  - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
+
+install:
+  - moodle-plugin-ci install -vvv
+
+script:
+  - moodle-plugin-ci phplint
+  - moodle-plugin-ci phpcpd
+  - moodle-plugin-ci phpmd
+  - moodle-plugin-ci codechecker
+  - moodle-plugin-ci csslint    # No CSS
+  - moodle-plugin-ci shifter
+  - moodle-plugin-ci jshint     # No JS
+# - moodle-plugin-ci phpunit    # No tests yet
+# - moodle-plugin-ci behat      # No tests yet
