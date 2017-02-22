@@ -112,7 +112,7 @@ class local_banner_renderer extends plugin_renderer_base {
 
         $html = '';
 
-        foreach($data as $property => $content) {
+        foreach ($data as $property => $content) {
             $html .= html_writer::empty_tag('meta', array('property' => $property, 'content' => $content)) . PHP_EOL;
         }
 

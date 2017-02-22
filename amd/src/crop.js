@@ -1,8 +1,8 @@
-define(["local_banner/cropper"], function (cropper) {
+define(["local_banner/cropper"], function (Cropper) {
     return {
         cropper: function(params) {
             var image = document.getElementById('bannerimage');
-            var cropper = new Cropper(image, {
+            new Cropper(image, {
                 viewMode: 1,
                 zoomable: false,
 
@@ -17,12 +17,14 @@ define(["local_banner/cropper"], function (cropper) {
                         rotate: params.banner.rotate
                     };
 
+                    // Zoom out, not used with viewMode 3.
+                    // ... this.cropper.zoom(-0.5);
+
                     this.cropper.setData(data);
-                    //this.cropper.zoom(-0.5);    // Zoom out, not used with viewMode 3.
                 },
 
                 // Updating the values each time the crop changes.
-                crop: function(e) {
+                crop: function() {
                     var cx = document.getElementsByName('cropx')[0];
                     var cy = document.getElementsByName('cropy')[0];
                     var sx = document.getElementsByName('scalex')[0];
@@ -41,8 +43,6 @@ define(["local_banner/cropper"], function (cropper) {
                     r.value = data.rotate;
                 }
             });
-
-            return cropper;
         }
     };
 });

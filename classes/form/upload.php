@@ -54,7 +54,7 @@ class upload extends \moodleform {
 
         $mform->addRule('banners', get_string('uploadbannerrequired', 'local_banner'), 'required', null, 'client');;
 
-        $buttonarray=array();
+        $buttonarray = array();
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('uploadbanner', 'local_banner'));
         $buttonarray[] = &$mform->createElement('cancel', 'cancelbutton', get_string('returntocancel', 'local_banner'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);

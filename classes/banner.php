@@ -29,6 +29,8 @@ use context_system;
 
 require_once($CFG->libdir . '/filelib.php');
 
+defined('MOODLE_INTERNAL') || die;
+
 class banner {
     const BANNER_DEFAULT = 0;
 
@@ -163,7 +165,7 @@ class banner {
         // Construct basic $data for a simple banner.
         $data = array(
             'context' => self::BANNER_PLACEHOLDER,
-            'course' =>  self::BANNER_PLACEHOLDER,
+            'course'  => self::BANNER_PLACEHOLDER,
         );
 
         return new banner($data);
@@ -174,25 +176,25 @@ class banner {
 
         preg_match('/[:]/', $config, $matches);
 
-        $ratio_w = $config; // ratio_w could be a single integer in the config.
-        $ratio_h = 1;       // default
+        $ratiow = $config; // This could be a single integer in the config.
+        $ratioh = 1;
 
         if ($matches) {
             $token = $matches[0];
             $exploded = explode($token, $config);
 
             if (count($exploded) == 2) {
-                $ratio_w = $exploded[0];
-                $ratio_h = $exploded[1];
+                $ratiow = $exploded[0];
+                $ratioh = $exploded[1];
             }
         }
 
-        return array($ratio_w, $ratio_h);
+        return array($ratiow, $ratioh);
     }
 
     public function get_ratio() {
-        list($ratio_w, $ratio_h) = $this->parse_ratio();
-        return $ratio_w / $ratio_h;
+        list($ratiow, $ratioh) = $this->parse_ratio();
+        return $ratiow / $ratioh;
     }
 
     public static function generate($courseid, $width, $height, $original) {
@@ -229,7 +231,7 @@ class banner {
         $banner->itemid = $width . $height;
 
         if ($original) {
-            $banner->itemid = banner::BANNER_DEFAULT;
+            $banner->itemid = self::BANNER_DEFAULT;
         }
 
         /*
@@ -241,7 +243,7 @@ class banner {
         $file = array_shift($filearray);
 
         // File does not exist. Create it.
-        if(empty($file)) {
+        if (empty($file)) {
 
             // No file has been saved for this course, return the default banner.
             if (empty($banner->file)) {
@@ -264,7 +266,7 @@ class banner {
         foreach ($files as $file) {
             if ($purge) {
                 $file->delete();
-            } elseif ($file->get_itemid() != banner::BANNER_DEFAULT) {
+            } else if ($file->get_itemid() != self::BANNER_DEFAULT) {
                 $file->delete();
             }
         }
@@ -311,94 +313,94 @@ class banner {
         }
 
         // Set defaults.
-        $dst_x = 0; // x-coordinate of destination point.
-        $dst_y = 0; // y-coordinate of destination point.
-        $src_x = $this->cropx; // x-coordinate of source point.
-        $src_y = $this->cropy; // y-coordinate of source point.
+        $dstx = 0; // x-coordinate of destination point.
+        $dsty = 0; // y-coordinate of destination point.
+        $srcx = $this->cropx; // x-coordinate of source point.
+        $srcy = $this->cropy; // y-coordinate of source point.
 
         // URL parameters passed to the generation.
-        $dst_w = $this->cropw; // Destination width.
-        $dst_h = $this->croph; // Destination height.
+        $dstw = $this->cropw; // Destination width.
+        $dsth = $this->croph; // Destination height.
 
         // Input image size.
-        $src_w = $imageinfo[0]; // Source width.
-        $src_h = $imageinfo[1]; // Source height.
+        $srcw = $imageinfo[0]; // Source width.
+        $srch = $imageinfo[1]; // Source height.
 
         // 1600 / 500 = 3.2
-        $file_input_ratio = $src_w / $src_h;
+        $fileinputratio = $srcw / $srch;
 
         // 1000 / 120 = 8.3333
-        $crop_output_ratio = $dst_w / $dst_h;
+        $cropoutputratio = $dstw / $dsth;
 
         // 1600 / 1000 = 1.6
-        $scale_w = $src_w / $dst_w;
+        $scalew = $srcw / $dstw;
 
         // 500 / 120 = 4.1667
-        $scale_h = $src_h / $dst_h;
+        $scaleh = $srch / $dsth;
 
         // Scale multiplications.
         // Resulting width  1000 * 1.6 = 1600
         // Resulting height 120  * 1.6 = 192
 
-        if ($file_input_ratio < $crop_output_ratio) {
+        if ($fileinputratio < $cropoutputratio) {
             // Taking a horizontal slice.
 
             // Take the maximum width of the image.
-            $src_w = $imageinfo[0];
+            $srcw = $imageinfo[0];
 
             // The maximum height multiplied by the scale;
-            $src_h = $dst_h *  $scale_w;
+            $srch = $dsth * $scalew;
 
             // Starting at the left side of the image.
-            $src_x = 0;
+            $srcx = 0;
 
             // Find the center of the focus box.
-            $focus_y = $src_y + ($this->height / 2);
+            $focusy = $srcy + ($this->height / 2);
 
             // Subtract half the height of the result.
-            $src_y = $focus_y - ($src_h / 2);
+            $srcy = $focusy - ($srch / 2);
 
             // Fix upper out of bounds.
-            if ($src_y < 0) {
-                $src_y = 0;
+            if ($srcy < 0) {
+                $srcy = 0;
             }
 
             // Fix lower out of bounds.
-            if ($src_y + $src_h > $imageinfo[1]) {
-                $src_y = $imageinfo[1] - $src_h;
+            if ($srcy + $srch > $imageinfo[1]) {
+                $srcy = $imageinfo[1] - $srch;
             }
 
         } else {
             // Taking a vertical slice.
 
             // Take the maximum height of the image;
-            $src_h = $imageinfo[1];
+            $srch = $imageinfo[1];
 
             // The maximum width multiplied by the scale;
-            $src_w = $dst_w * $scale_h;
+            $srcw = $dstw * $scaleh;
 
             // Starting at the top of the image.
-            $src_y = 0;
+            $srcy = 0;
 
             // Find the center of the focus box.
-            $focus_x = $src_x + ($this->width / 2);
+            $focusx = $srcx + ($this->width / 2);
 
             // Subtract half the width of the result.
-            $src_x = $focus_x - ($src_w / 2);
+            $srcx = $focusx - ($srcw / 2);
 
             // Fix left out of bounds.
-            if ($src_x < 0) {
-                $src_x = 0;
+            if ($srcx < 0) {
+                $srcx = 0;
             }
 
             // Fix right out of bounds.
-            if ($src_x + $src_w > $imageinfo[0]) {
-                $src_x = $imageinfo[0] - $src_w;
+            if ($srcx + $srcw > $imageinfo[0]) {
+                $srcx = $imageinfo[0] - $srcw;
             }
         }
 
         // The resulting canvas that we will end up with is the destination height and width.
-        $canvas = imagecreatetruecolor($dst_w, $dst_h);
+        $canvas = imagecreatetruecolor($dstw, $dsth);
 
         // Create a transparent canvas.
         imagealphablending($canvas, false);
@@ -409,7 +411,7 @@ class banner {
         imagesetinterpolation($canvas, IMG_BICUBIC);
         imagesetinterpolation($original, IMG_BICUBIC);
 
-        imagecopyresampled($canvas, $original, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
+        imagecopyresampled($canvas, $original, $dstx, $dsty, $srcx, $srcy, $dstw, $dsth, $srcw, $srch);
 
         // Write the canvas to the temporary file.
         imagepng($canvas, $tmpfile, 9);
@@ -469,7 +471,7 @@ class banner {
             // If the default banner has been set, we will render it.
             $defaultbanner = get_config('local_banner', 'defaultbanner');
             if (!empty($defaultbanner)) {
-                $html = self::render_style(banner::BANNER_PLACEHOLDER);
+                $html = self::render_style(self::BANNER_PLACEHOLDER);
             } else {
                 $html = '';
             }
