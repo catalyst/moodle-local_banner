@@ -26,32 +26,69 @@
 class restore_local_banner_plugin extends restore_local_plugin {
 
     /**
-     * Defines upload banner path in coure/course.xml
+     * Defines banner path in coure/course.xml
      *
      * @return array
      */
     protected function define_course_plugin_structure() {
         $paths = array();
-        $paths[] = new restore_path_element('banner', $this->get_pathfor());
+        $paths[] = new restore_path_element('banner', '/course/local_banner');
 
         return $paths;
     }
 
     /**
-     * Process upload banner information
+     * Process banner information
      *
      * @param array $data information
      */
-    public function process_upload_banner($data) {
-        // Map itemid from the backup to courseid of a new course.
-        $this->set_mapping('itemid', $data['itemid'], $this->task->get_courseid(), true);
+    public function process_banner($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $oldid = $data->id;
+        $data->course = $this->task->get_courseid();
+        $data->context = $this->task->get_contextid();
+
+        $newitemid = $DB->insert_record('local_banner', $data);
+        $this->set_mapping('banner', $oldid, $newitemid);
     }
 
     /**
      * Process the banner file
      */
     protected function after_execute_course() {
-        $this->add_related_files('local_banner', 'banners', 'itemid');
+        global $DB;
+
+        $this->add_related_files('local_banner', 'banners', null);
+
+        $courseid = $this->task->get_courseid();
+        $contextid = $this->task->get_contextid();
+
+        // Remap the file to this new banner.
+        $fs = get_file_storage();
+
+        $params = array(
+            'course' => $courseid,
+            'context' => $contextid,
+        );
+
+        // Search for  files without specifying the itemid and ignore directories.
+        $files = $fs->get_area_files($contextid, 'local_banner', 'banners', false, 'itemid', false);
+        foreach ($files as $file) {
+            $itemid = $file->get_itemid();
+
+            if ($itemid === "0") {
+                // This is the default uploaded file.
+                $banner = $DB->get_record('local_banner', $params);
+                $banner->file = $file->get_id();
+                $DB->update_record('local_banner', $banner);
+                break;
+            }
+        }
+
+        $b = \local_banner\banner::load_from_courseid($courseid);
+        $b->invalidate_banner();
     }
 }
 

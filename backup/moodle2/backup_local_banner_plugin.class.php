@@ -33,12 +33,32 @@ class backup_local_banner_plugin extends backup_local_plugin {
         $context = context_course::instance($courseid);
 
         $plugin = $this->get_plugin_element(null, $this->get_include_condition(), 'include');
-        $pluginwrapper = new backup_nested_element($this->get_recommended_name(), null, 'course');
-        $pluginwrapper->set_source_array(array((object)array('course' => $courseid)));
-        $plugin->add_child($pluginwrapper);
-        $pluginwrapper->annotate_files('local_banner', 'banners', 'course', $courseid);
 
-        // $files = $fs->get_area_files($coursecontext->id, 'local_banner', 'banners', banner::BANNER_DEFAULT, false);
+        // Define each element separated.
+        $banner = new backup_nested_element('local_banner', array('id'),
+                                            array('course',
+                                                  'context',
+                                                  'file',
+                                                  'filename',
+                                                  'cropx',
+                                                  'cropy',
+                                                  'scalex',
+                                                  'scaley',
+                                                  'height',
+                                                  'width',
+                                                  'rotate'));
+
+        // Build the structure.
+        $plugin->add_child($banner);
+
+        // Define sources.
+        $banner->set_source_table('local_banner', array('course' => backup::VAR_COURSEID));
+
+        // Define id annotations.
+        $banner->annotate_ids('courseid', 'course');
+
+        // Define file annotations.
+        $banner->annotate_files('local_banner', 'banners', null, $context->id);
 
         return $plugin;
     }
@@ -52,11 +72,11 @@ class backup_local_banner_plugin extends backup_local_plugin {
     protected function get_include_condition() {
         global $DB;
 
-        $result = '';
         $courseid = $this->task->get_courseid();
         $context = context_course::instance($courseid);
 
-        $params = array('component' => 'local_banner', 'course' => $courseid, 'contextid' => $context->id);
+        $result = '';
+        $params = array('component' => 'local_banner', 'contextid' => $context->id);
         $bannerexists = $DB->record_exists('files', $params);
 
         if (!empty($bannerexists)) {
