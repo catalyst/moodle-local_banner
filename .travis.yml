@@ -16,10 +16,14 @@ php:
  - 7.0
 
 env:
-  - DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE
-  - DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE
-  - DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE
-  - DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE
+  global:
+    - IGNORE_PATHS=amd/src/cropper.js,css/cropper.js
+    - IGNORE_NAMES=*.min.js
+  matrix:
+    - DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE
+    - DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE
+    - DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE
+    - DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE
 
 before_install:
   - phpenv config-rm xdebug.ini
@@ -36,8 +40,8 @@ script:
   - moodle-plugin-ci phpcpd
   - moodle-plugin-ci phpmd
   - moodle-plugin-ci codechecker
-  - moodle-plugin-ci csslint    # No CSS
+  - moodle-plugin-ci csslint
   - moodle-plugin-ci shifter
-  - moodle-plugin-ci jshint     # No JS
+  - moodle-plugin-ci jshint
 # - moodle-plugin-ci phpunit    # No tests yet
 # - moodle-plugin-ci behat      # No tests yet
