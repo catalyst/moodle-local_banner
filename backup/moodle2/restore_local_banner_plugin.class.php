@@ -52,6 +52,9 @@ class restore_local_banner_plugin extends restore_local_plugin {
         $data->course = $this->task->get_courseid();
         $data->context = $this->task->get_contextid();
 
+        // Cleanup duplicate banners when merging content.
+        $DB->delete_records('local_banner', array('course' => $data->course));
+
         $newitemid = $DB->insert_record('local_banner', $data);
         $this->set_mapping('banner', $oldid, $newitemid);
     }
