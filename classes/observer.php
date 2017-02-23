@@ -47,4 +47,26 @@ class local_banner_observer {
             return true;
         }
     }
+
+    /**
+     * Triggered via course_content_deleted event.
+     *
+     * @param \core\event\course_content_deleted $event
+     * @return bool true on success
+     */
+    public static function course_content_deleted(\core\event\course_content_deleted $event) {
+        global $DB;
+
+        $params = array(
+            'course' => $event->courseid,
+        );
+
+        // Files are removed via $contextid->delete_content().
+
+        $banner = $DB->get_records('local_banner', $params);
+        if (!empty($banner)) {
+            $DB->delete_records('local_banner', $params);
+            return true;
+        }
+    }
 }

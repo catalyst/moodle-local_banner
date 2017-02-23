@@ -30,4 +30,8 @@ $observers = array(
         'eventname' => '\core\event\course_deleted',
         'callback'  => 'local_banner_observer::course_deleted',
     ),
+    array(
+        'eventname' => '\core\event\course_content_deleted',
+        'callback'  => 'local_banner_observer::course_content_deleted',
+    ),
 );
