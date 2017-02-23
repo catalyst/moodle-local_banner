@@ -28,13 +28,13 @@ defined('MOODLE_INTERNAL') || die;
 class restore_local_banner_plugin extends restore_local_plugin {
 
     /**
-     * Defines banner path in coure/course.xml
+     * Defines banner path in course/course.xml
      *
      * @return array
      */
     protected function define_course_plugin_structure() {
         $paths = array();
-        $paths[] = new restore_path_element('banner', '/course/local_banner');
+        $paths[] = new restore_path_element('banner', $this->get_pathfor(''));
 
         return $paths;
     }
@@ -85,7 +85,6 @@ class restore_local_banner_plugin extends restore_local_plugin {
                 $banner = $DB->get_record('local_banner', $params);
                 $banner->file = $file->get_id();
                 $DB->update_record('local_banner', $banner);
-                break;
             }
         }
 
