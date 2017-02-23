@@ -92,7 +92,9 @@ class restore_local_banner_plugin extends restore_local_plugin {
         }
 
         $b = \local_banner\banner::load_from_courseid($courseid);
-        $b->invalidate_banner();
+        if (!empty($b)) {
+            $b->invalidate_banner();
+        }
     }
 }
 
