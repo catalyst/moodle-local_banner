@@ -32,6 +32,7 @@ $string['height'] = 'Cropped height';
 $string['height_desc'] = 'The maximum height of the cropped result.';
 $string['modifybanner'] = '{$a}: Modify Banner';
 $string['pluginname'] = 'Course Banner';
+$string['privacy:metadata'] = 'This plugin does not store personal data.';
 $string['removebanner'] = 'Remove Banner';
 $string['removebannercourse'] = '{$a}: Remove Banner';
 $string['removebannernotification'] = 'You are about to remove the banner for this course. This will restore the placeholder if it exists.';
