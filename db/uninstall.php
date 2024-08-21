@@ -15,26 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * local banner plugin uninstall script.
+ * local_banner plugin uninstall script.
  *
  * @package    local_banner
+ * @copyright  2024 Catalyst
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
- * Hook called just before the plugin is uninstalled. Removes db entries and files from filesystem.
+ * Hook called just before the plugin is uninstalled. Removes db entries and files from the filesystem.
  *
  * @return bool Whether the function was successful.
  */
 function xmldb_local_banner_uninstall() {
-    global $CFG, $DB;
+    global $DB;
 
     // Get all files from mdl_files where component is local_banner.
-    $banners = $DB->get_records('files', array('component' => 'local_banner'), '', 'id, contextid, itemid');
-    
-    foreach($banners as $banner) {
+    $banners = $DB->get_records('files', [
+        'component' => 'local_banner',
+    ], '', 'id, contextid, itemid');
+
+    foreach ($banners as $banner) {
         // Delete the banner files for this course.
         $fs = get_file_storage();
         $fs->delete_area_files($banner->contextid, 'local_banner', 'banners', $banner->itemid);
